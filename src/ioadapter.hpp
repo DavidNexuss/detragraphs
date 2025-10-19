@@ -40,7 +40,7 @@ struct IOAdapterUnis : public IOAdapter {
         if (errno == EINTR) continue;
         return -1;
       }
-      if (r == 0) break; // EOF
+      if (r == 0) break;
       total += r;
     }
     return total;

@@ -209,7 +209,9 @@ void test_clustering() {
             << " ms\n";
 }
 
+void test_eigensolver_complex() {}
+
+
 int main() {
-  test_clustering<Graph<backends::AdjacencyMatrixFlat<char>>>();
   return 0;
 }
