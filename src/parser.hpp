@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstdint>
 #include <nlohmann/json.hpp>
+#include "parser/convert_flatmatrix.hpp"
 
 namespace graphs {
 namespace parser {
@@ -40,6 +41,11 @@ std::string tojson(const GraphT& graph) {
 
   nlohmann::json j = representation;
   return j.dump();
+}
+
+template <typename G>
+G convert(const G& graph) {
+  return graph;
 }
 
 template <typename Input, typename Output>

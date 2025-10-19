@@ -22,6 +22,7 @@ file(GLOB_RECURSE INCLUDE_SRC
 include_directories(lib/detrarandom)
 
 add_subdirectory(lib/detrarandom)
+add_subdirectory(lib/eigen)
 
 # add_library(detragraphs ${INCLUDE_SRC})
 # target_link_libraries(detragraphs detrarandom)
@@ -29,4 +30,4 @@ add_subdirectory(lib/detrarandom)
 add_executable(detragraphs_test ${SRC})
 
 target_include_directories(detragraphs_test PRIVATE src)
-# target_link_libraries(detragraphs_test detragraphs)
+target_link_libraries(detragraphs_test eigen)

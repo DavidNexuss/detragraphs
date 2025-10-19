@@ -47,7 +47,7 @@ configure_cmake() {
   local dir="$1"
   local type="$2"
   info "Configuring CMake ($type)..."
-  CC=/usr/bin/gcc CXX=/usr/bin/g++ cmake -S . -B "$dir" -DCMAKE_BUILD_TYPE="$type" > /dev/null && 
+  CC=/usr/bin/gcc CXX=/usr/bin/g++ cmake -Wno-dev -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -S . -B "$dir" -DCMAKE_BUILD_TYPE="$type" > /dev/null && 
   doneok "CMake configured for $type" || error "CMake failed to be configured for $type"
 }
 echo -e "📀$CYAN Checking out LFS files...$NC"

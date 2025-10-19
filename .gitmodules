@@ -4,3 +4,6 @@
 [submodule "lib/json"]
 	path = lib/json
 	url = https://github.com/nlohmann/json
+[submodule "lib/eigen"]
+	path = lib/eigen
+	url = https://github.com/PX4/eigen.git

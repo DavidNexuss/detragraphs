@@ -259,7 +259,5 @@ GraphO sample_graph(const GraphT& graph, uint64_t N) {
 
   return out;
 }
-
-
 } // namespace algorithms
 } // namespace graphs
