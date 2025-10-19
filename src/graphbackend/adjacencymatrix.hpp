@@ -1,9 +1,7 @@
 #pragma once
 #include <vector>
 #include <cstdint>
-#include <string>
 #include <unordered_set>
-#include "../ioadapter.hpp"
 #include <iostream>
 
 namespace graphs {
@@ -31,6 +29,18 @@ struct AdjacencyMatrix {
     return c;
   }
 
+  std::vector<uint64_t> getEdges(uint64_t vertex) const {
+    std::vector<uint64_t> neighbours;
+    ssize_t               u = 0;
+
+    for (auto v : mat[vertex]) {
+      if (v)
+        neighbours.push_back(u);
+      u++;
+    }
+    return neighbours;
+  }
+
   void addEdge(uint64_t from, uint64_t to) {
     if (from == to) return;
     mat[from][to] = true;
@@ -39,10 +49,6 @@ struct AdjacencyMatrix {
   bool isConnected(uint64_t from, uint64_t to) const {
     return mat[from][to];
   }
-
-  void writedisk(const std::string&, std::shared_ptr<detra::IOAdapter>) {}
-
-  void readdisk(const std::string&, std::shared_ptr<detra::IOAdapter>) {}
 
   void addVertices(uint64_t vertices) {
     size_t old_size = mat.size();
@@ -85,6 +91,16 @@ struct AdjacencyMatrixFlat {
     return c;
   }
 
+  std::vector<uint64_t> getEdges(uint64_t vertex) const {
+    std::vector<uint64_t> neighbours;
+    ssize_t               u = 0;
+    for (ssize_t i = vertex * N; i < (vertex + 1) * N; i++) {
+      if (mat[i]) neighbours.push_back(u);
+      u++;
+    }
+    return neighbours;
+  }
+
   void addEdge(uint64_t from, uint64_t to) {
     if (from == to) return;
     mat[from * N + to] = true;
@@ -93,9 +109,6 @@ struct AdjacencyMatrixFlat {
   bool isConnected(uint64_t from, uint64_t to) const {
     return mat[from * N + to];
   }
-
-  void writedisk(const std::string&, std::shared_ptr<detra::IOAdapter>) {}
-  void readdisk(const std::string&, std::shared_ptr<detra::IOAdapter>) {}
 
   void addVertices(uint64_t vertices) {
     size_t oldN = N;
@@ -132,7 +145,7 @@ struct AdjacencyMatrixRange {
     if (from == to) return;
     auto& vec = ranges[from];
     if (!vec.empty() && vec.back().second + 1 == to)
-      vec.back().second = to; // extend last range
+      vec.back().second = to;
     else
       vec.emplace_back(to, to);
   }
@@ -158,9 +171,6 @@ struct AdjacencyMatrixRange {
       c += r.second - r.first + 1;
     return c;
   }
-
-  void writedisk(const std::string&, std::shared_ptr<detra::IOAdapter>) {}
-  void readdisk(const std::string&, std::shared_ptr<detra::IOAdapter>) {}
 
   void print() {
     std::cout << "---AdjacencyMatrixRange---" << std::endl;
@@ -208,9 +218,6 @@ struct AdjacencyMatrixHash {
   bool isConnected(uint64_t from, uint64_t to) const {
     return edges.find({from, to}) != edges.end();
   }
-
-  void writedisk(const std::string&, std::shared_ptr<detra::IOAdapter>) {}
-  void readdisk(const std::string&, std::shared_ptr<detra::IOAdapter>) {}
 
   void addVertices(uint64_t vertices) { N += vertices; }
 

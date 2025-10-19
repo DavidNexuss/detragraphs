@@ -1,19 +1,33 @@
 #pragma once
-#include "ioadapter.hpp"
 #include <cstdint>
-#include <memory>
+#include <vector>
 
 namespace graphs {
 
+enum class GraphType {
+  DIRECTED,
+  UNDIRECTED
+};
+
 template <typename Backend>
 struct Graph {
-  Backend data;
+  Backend   data;
+  GraphType type = GraphType::DIRECTED;
 
   inline uint64_t getVertexCount() const { return data.getVertexCount(); }
   inline uint64_t getEdgeCount() const { return data.getEdgeCount(); }
   inline uint64_t getEdgeCount(uint64_t vertex) const { return data.getEdgeCount(vertex); }
 
-  inline void addEdge(uint64_t from, uint64_t to) { data.addEdge(from, to); }
+  inline void setType(GraphType type) {
+    this->type = type;
+  }
+
+  inline void addEdge(uint64_t from, uint64_t to) {
+    data.addEdge(from, to);
+    if (type == GraphType::UNDIRECTED) {
+      data.addEdge(to, from);
+    }
+  }
 
   inline bool isConnected(uint64_t from, uint64_t to) const { return data.isConnected(from, to); }
 
@@ -23,16 +37,14 @@ struct Graph {
   }
   inline void addVertices(uint64_t vertices) { data.addVertices(vertices); }
 
-  inline void writedisk(const std::string& path, std::shared_ptr<detra::IOAdapter> io = detra::unisIO()) {
-    data.writedisk(path, io);
-  }
-
-  inline void readdisk(const std::string& path, std::shared_ptr<detra::IOAdapter> io = detra::unisIO()) {
-    data.readdisk(path, io);
-  }
+  inline std::vector<uint64_t> getEdges(uint64_t vertex) const { return data.getEdges(vertex); }
 
   inline void print() {
     data.print();
+  }
+
+  inline float getEdgeWeight(uint64_t u, uint64_t v) const {
+    return 1.0f;
   }
 };
 } // namespace graphs

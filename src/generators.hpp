@@ -1,12 +1,17 @@
 #include <unordered_set>
 #include <detrarandom/random_sources.hpp>
 #include <stdexcept>
-namespace graphs {
-namespace generators {
-template <typename GraphT, typename RandomSource>
+#include "graph.hpp"
 
-GraphT erdos_renyi_undirected(uint64_t n, double p, RandomSource randomSource = RandomSource{}) {
+namespace graphs {
+
+namespace generators {
+
+template <typename GraphT, typename RandomSource, bool directed = false>
+GraphT erdos_renyi(uint64_t n, double p, RandomSource randomSource = RandomSource{}) {
   GraphT g;
+
+  g.setType(directed ? GraphType::DIRECTED : GraphType::UNDIRECTED);
   g.addVertices(n);
 
   for (uint64_t i = 0; i < n; ++i) {
@@ -19,12 +24,13 @@ GraphT erdos_renyi_undirected(uint64_t n, double p, RandomSource randomSource = 
   return g;
 }
 
-template <typename GraphT, typename RandomSource>
-GraphT barabasi_albert_undirected(uint64_t n, uint64_t m0, uint64_t m, RandomSource randomSource = RandomSource{}) {
+template <typename GraphT, typename RandomSource, bool directed = false>
+GraphT barabasi_albert(uint64_t n, uint64_t m0, uint64_t m, RandomSource randomSource = RandomSource{}) {
   if (m > m0 || m0 >= n) throw std::invalid_argument("Invalid parameters for BA model");
 
   GraphT g;
   g.addVertices(m0);
+  g.setType(directed ? GraphType::DIRECTED : GraphType::UNDIRECTED);
 
   for (uint64_t i = 0; i < m0; ++i)
     for (uint64_t j = i + 1; j < m0; ++j)
@@ -55,11 +61,12 @@ GraphT barabasi_albert_undirected(uint64_t n, uint64_t m0, uint64_t m, RandomSou
   return g;
 }
 
-template <typename GraphT, typename RandomSource>
-GraphT watts_strogatz_undirected(uint64_t n, uint64_t k, double beta, RandomSource randomSource = RandomSource{}) {
+template <typename GraphT, typename RandomSource, bool directed = false>
+GraphT watts_strogatz(uint64_t n, uint64_t k, double beta, RandomSource randomSource = RandomSource{}) {
   if (k >= n) throw std::invalid_argument("k must be < n");
 
   GraphT g;
+  g.setType(directed ? GraphType::DIRECTED : GraphType::UNDIRECTED);
   g.addVertices(n);
 
   for (uint64_t i = 0; i < n; ++i)

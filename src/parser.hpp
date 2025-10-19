@@ -1,0 +1,61 @@
+#pragma once
+#include <string>
+#include <map>
+#include <vector>
+#include <cstdint>
+#include <nlohmann/json.hpp>
+
+namespace graphs {
+namespace parser {
+
+using GraphJsonRepresentation = std::map<uint64_t, std::vector<uint64_t>>;
+
+template <typename GraphT>
+GraphT fromjson(const std::string& data) {
+  GraphT result;
+
+  GraphJsonRepresentation representation = (nlohmann::json(data)).get<GraphJsonRepresentation>();
+
+  uint64_t maximumVertex = 0;
+  for (auto& val : representation) maximumVertex = std::max(val.first, maximumVertex);
+
+  result.addVertices(maximumVertex);
+
+  for (auto& u : representation)
+    for (auto v : u.second)
+      result.addEdge(u.first, v);
+
+  return result;
+}
+
+template <typename GraphT>
+std::string tojson(const GraphT& graph) {
+
+  GraphJsonRepresentation representation;
+
+  for (uint64_t i = 0; i < graph.getVertexCount(); i++) {
+    std::vector<uint64_t> edges = graph.getEdges(i);
+    if (edges.size() != 0) representation[i] = std::move(edges);
+  }
+
+  nlohmann::json j = representation;
+  return j.dump();
+}
+
+template <typename Input, typename Output>
+Output convert(const Input& input) {
+  uint64_t N = input.getVertexCount();
+  Output   output;
+  output.addVertices(N);
+
+  for (uint64_t u = 0; u < N; u++) {
+    for (uint64_t v : input.getEdges(u))
+      output.addEdge(u, v);
+  }
+
+  return output;
+}
+
+
+} // namespace parser
+} // namespace graphs

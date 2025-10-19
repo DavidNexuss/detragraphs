@@ -2,9 +2,7 @@
 #include <vector>
 #include <unordered_set>
 #include <cstdint>
-#include <string>
 #include <algorithm>
-#include "../ioadapter.hpp"
 #include <iostream>
 
 namespace graphs {
@@ -21,6 +19,8 @@ struct AdjacencyListVector {
   }
   uint64_t getEdgeCount(uint64_t v) const { return adj[v].size(); }
 
+  std::vector<uint64_t> getEdges(uint64_t u) const { return adj[u]; }
+
   void addEdge(uint64_t from, uint64_t to) {
     if (from == to) return;
     if (std::find(adj[from].begin(), adj[from].end(), to) == adj[from].end())
@@ -30,9 +30,6 @@ struct AdjacencyListVector {
   bool isConnected(uint64_t from, uint64_t to) const {
     return std::find(adj[from].begin(), adj[from].end(), to) != adj[from].end();
   }
-
-  void writedisk(const std::string&, std::shared_ptr<detra::IOAdapter>) {}
-  void readdisk(const std::string&, std::shared_ptr<detra::IOAdapter>) {}
 
   void addVertices(uint64_t vertices) {
     adj.resize(adj.size() + vertices, {});
@@ -70,9 +67,6 @@ struct AdjacencyListHash {
     return adj[from].count(to) > 0;
   }
 
-  void writedisk(const std::string&, std::shared_ptr<detra::IOAdapter>) {}
-  void readdisk(const std::string&, std::shared_ptr<detra::IOAdapter>) {}
-
   void addVertices(uint64_t vertices) {
     adj.resize(adj.size() + vertices);
   }
@@ -102,9 +96,6 @@ struct AdjacencyListSorted {
     const auto& vec = adj[from];
     return std::binary_search(vec.begin(), vec.end(), to);
   }
-
-  void writedisk(const std::string&, std::shared_ptr<detra::IOAdapter>) {}
-  void readdisk(const std::string&, std::shared_ptr<detra::IOAdapter>) {}
 
   void addVertices(uint64_t vertices) {
     adj.resize(adj.size() + vertices, {});
@@ -141,9 +132,6 @@ struct AdjacencyListFlat {
     size_t end   = (from + 1 < offsets.size()) ? offsets[from + 1] : edges.size();
     return std::find(edges.begin() + start, edges.begin() + end, to) != edges.begin() + end;
   }
-
-  void writedisk(const std::string&, std::shared_ptr<detra::IOAdapter>) {}
-  void readdisk(const std::string&, std::shared_ptr<detra::IOAdapter>) {}
 
   void addVertices(uint64_t vertices) {
     size_t old = offsets.size();

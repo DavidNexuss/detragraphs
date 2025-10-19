@@ -12,11 +12,11 @@ project(detragraphs)
 find_package(OpenMP)
 
 file(GLOB_RECURSE SRC 
-  src/*.cpp
+  tests/*.cpp
 )
 
 file(GLOB_RECURSE INCLUDE_SRC
-  detragraphs/*.cpp
+  src/*.cpp
 )
 
 include_directories(lib/detrarandom)
@@ -28,5 +28,5 @@ add_subdirectory(lib/detrarandom)
 
 add_executable(detragraphs_test ${SRC})
 
-target_include_directories(detragraphs_test PRIVATE detragraphs)
+target_include_directories(detragraphs_test PRIVATE src)
 # target_link_libraries(detragraphs_test detragraphs)
