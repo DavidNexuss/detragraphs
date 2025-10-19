@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <iomanip>
+#include <type_traits>
 
 namespace detra {
 namespace math {
@@ -11,6 +12,9 @@ struct FlatMatrix {
   size_t         N;
   size_t         M;
   std::vector<T> p_data;
+
+  FlatMatrix()                        = default;
+  FlatMatrix(const FlatMatrix& other) = default;
 
   FlatMatrix(size_t _N, size_t _M) :
     N(_N), M(_M), p_data(_N * _M) {}
@@ -31,12 +35,25 @@ struct FlatMatrix {
     T& operator[](size_t j) { return data[i * M + j]; }
   };
 
+  FlatMatrixProxy operator[](size_t i) { return FlatMatrixProxy(i, M, p_data); }
 
-  FlatMatrixProxy& operator[](size_t i) { return FlatMatrixProxy(i, M, p_data); }
 
+  struct ConstFlatMatrixProxy {
+    size_t i;
+    size_t M;
 
-  size_t getColumnCount() { return M; }
-  size_t getRowCount() { return N; }
+    const std::vector<T>& data;
+
+    ConstFlatMatrixProxy(size_t _i, size_t _M, const std::vector<T>& _data) :
+      i(_i), M(_M), data(_data) {}
+
+    const T& operator[](size_t j) const { return data[i * M + j]; }
+  };
+
+  ConstFlatMatrixProxy operator[](size_t i) const { return ConstFlatMatrixProxy(i, M, p_data); }
+
+  size_t getColumnCount() const { return M; }
+  size_t getRowCount() const { return N; }
 
   T*       data() { return p_data.data(); }
   const T* data() const { return p_data.data(); }

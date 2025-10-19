@@ -11,7 +11,7 @@ namespace metrics {
 template <typename GraphT>
 
 detra::math::FlatMatrix<float> laplacian_matrix(const GraphT& inputmatrix) {
-  detra::math::FlatMatrix<float> result = parser::convert(inputmatrix);
+  detra::math::FlatMatrix<float> result = parser::convert_matrix(inputmatrix);
 
   auto degree_sequence = metrics::degree_sequence<GraphT>(inputmatrix);
 

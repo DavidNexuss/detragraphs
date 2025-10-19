@@ -7,6 +7,10 @@
 #include <chrono>
 #include <iostream>
 #include "algorithms.hpp"
+#include "util/timer.hpp"
+#include "metrics/spectral.hpp"
+#include "math/eigen.hpp"
+#include <thread>
 
 using namespace graphs;
 using namespace graphs::backends;
@@ -209,9 +213,39 @@ void test_clustering() {
             << " ms\n";
 }
 
-void test_eigensolver_complex() {}
+void test_eigensolver_complex() {
+  DETRA_TIMER(EigenSolver)
+
+  constexpr uint64_t TOTAL_VERTICES = 30;
+  constexpr double   EDGE_PROB      = 0.5;
+
+  using GraphType = Graph<backends::AdjacencyMatrixFlat<float>>;
+  GraphType fullGraph;
+
+  {
+    DETRA_TIMER(EigenSolverGeneration)
+    fullGraph = generators::erdos_renyi<GraphType, random_sources::XORand>(TOTAL_VERTICES, EDGE_PROB);
+  }
+
+  detra::math::FlatMatrix<float> laplacian;
+  {
+    DETRA_TIMER(EigenSolverLaplacian)
+    laplacian = metrics::laplacian_matrix(fullGraph);
+  }
+
+  {
+    DETRA_TIMER(EigenSolverComputation)
+
+    auto solution = detra::math::eigenvalues(laplacian);
+
+    fullGraph.print();
+    for (int i = 0; i < solution.size(); i++) std::cout << solution[i] << std::endl;
+  }
+}
 
 
 int main() {
+  Eigen::setNbThreads(std::thread::hardware_concurrency());
+  test_eigensolver_complex();
   return 0;
 }

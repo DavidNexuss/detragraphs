@@ -14,6 +14,7 @@ std::vector<std::complex<float>> eigenvalues(FlatMatrix<float>& matrix) {
   }
 
   using MatrixType = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
   Eigen::Map<MatrixType> eigen_matrix(matrix.data(), N, M);
 
   Eigen::EigenSolver<MatrixType> solver(eigen_matrix);
