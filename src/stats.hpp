@@ -1,5 +1,7 @@
 #pragma once
 #include <vector>
+#include <cmath>
+#include <limits>
 
 namespace graphs {
 namespace stats {
@@ -30,6 +32,15 @@ float sd(const std::vector<float>& x) {
     deviation += (i - avg) * (i - avg);
   }
   return std::sqrt(deviation / x.size());
+}
+
+float square_differecne(const std::vector<float>& a, const std::vector<float>& b) {
+  if (a.size() != b.size()) return std::numeric_limits<float>::max();
+  double accum = 0.0;
+  for (size_t i = 0; i < a.size(); i++) {
+    accum += std::pow(a[i] - b[i], 2.0);
+  }
+  return accum;
 }
 
 } // namespace stats

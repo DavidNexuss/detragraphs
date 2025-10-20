@@ -216,15 +216,12 @@ void test_clustering() {
 void test_eigensolver_complex() {
   DETRA_TIMER(EigenSolver)
 
-  constexpr uint64_t TOTAL_VERTICES = 30;
-  constexpr double   EDGE_PROB      = 0.5;
-
   using GraphType = Graph<backends::AdjacencyMatrixFlat<float>>;
   GraphType fullGraph;
 
   {
     DETRA_TIMER(EigenSolverGeneration)
-    fullGraph = generators::erdos_renyi<GraphType, random_sources::XORand>(TOTAL_VERTICES, EDGE_PROB);
+    fullGraph = generators::prefferential_directed<GraphType, random_sources::XORand>(200, 1200);
   }
 
   detra::math::FlatMatrix<float> laplacian;
@@ -238,8 +235,13 @@ void test_eigensolver_complex() {
 
     auto solution = detra::math::eigenvalues(laplacian);
 
-    fullGraph.print();
     for (int i = 0; i < solution.size(); i++) std::cout << solution[i] << std::endl;
+  }
+
+  {
+    DETRA_TIMER(Jacobi)
+    detra::math::row_normalize(laplacian);
+    auto result = detra::math::jacobi(laplacian);
   }
 }
 
