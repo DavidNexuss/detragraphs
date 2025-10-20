@@ -191,6 +191,7 @@ void test_eigensolver_complex() {
   DETRA_TIMER(EigenSolver)
 
   using GraphType = Graph<backends::AdjacencyMatrixFlat<float>>;
+
   GraphType fullGraph;
 
   {

@@ -31,7 +31,6 @@ GraphT fromjson(const std::string& data) {
 
 template <typename GraphT>
 std::string tojson(const GraphT& graph) {
-
   GraphJsonRepresentation representation;
 
   for (uint64_t i = 0; i < graph.getVertexCount(); i++) {

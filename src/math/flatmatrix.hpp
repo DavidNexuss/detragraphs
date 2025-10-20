@@ -80,7 +80,6 @@ struct FlatMatrix {
         } else {
           std::cout << std::setw(4) << p_data[i * M + j];
         }
-
         if (j < M - 1) {
           std::cout << ", ";
         }
