@@ -6,4 +6,5 @@ This is detramotor general purpose graph computation module.
 
 ```
 - Add addEdgeOnce to the API.
+- Add invertedEdges to the API.
 ```
