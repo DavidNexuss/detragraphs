@@ -6,6 +6,9 @@
 #include <random>
 #include <algorithm>
 #include <stdexcept>
+#include <thread>
+#include <omp.h>
+#include <assert.h>
 
 namespace graphs {
 namespace algorithms {
@@ -34,7 +37,6 @@ std::vector<WalkResult> walk_dfs(const GraphT& graph, uint64_t source) {
 
   vertex_visited[source] = 1;
 
-  result.push_back({source, 0});
   walk_dfs_recursive(graph, source, vertex_visited, result, 1);
   return result;
 }
@@ -49,7 +51,6 @@ std::vector<WalkResult> walk_bfs(const GraphT& graph, uint64_t source) {
   std::vector<uint64_t> toVisit;
 
   toVisit.push_back(source);
-  result.push_back({source, 0});
   vertex_visited[source] = 1;
 
   int depth = 0;
@@ -71,7 +72,6 @@ std::vector<WalkResult> walk_bfs(const GraphT& graph, uint64_t source) {
   }
   return result;
 }
-
 
 template <typename GraphT, typename GraphO>
 GraphO walk_bfs_tree(const GraphT& graph, uint64_t source) {

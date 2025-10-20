@@ -7,7 +7,7 @@
 namespace detra {
 namespace math {
 
-std::vector<std::complex<float>> eigenvalues(FlatMatrix<float>& matrix) {
+std::vector<std::complex<float>> eigenvalues(const FlatMatrix<float>& matrix) {
   size_t N = matrix.getRowCount();
   size_t M = matrix.getColumnCount();
 
@@ -35,6 +35,26 @@ std::vector<std::complex<float>> eigenvalues(FlatMatrix<float>& matrix) {
   }
 
   return result_eigenvalues;
+}
+
+float spectral_radius(const FlatMatrix<float>& matrix) {
+  std::vector<std::complex<float>> evals = eigenvalues(matrix);
+
+  if (evals.empty()) {
+    return 0.0f;
+  }
+
+  float max_modulus = 0.0f;
+
+  for (const auto& lambda : evals) {
+    float modulus = std::abs(lambda);
+
+    if (modulus > max_modulus) {
+      max_modulus = modulus;
+    }
+  }
+
+  return max_modulus;
 }
 
 void row_normalize(FlatMatrix<float>& matrix) {
@@ -72,7 +92,7 @@ std::vector<float> jacobi(FlatMatrix<float>& matrix) {
 
   do {
     matrix.apply_inplace(result[0], result[1]);
-    difference = graphs::stats::square_differecne(result[0], result[1]);
+    difference = graphs::stats::square_difference(result[0], result[1]);
     std::cout << iteration << " " << difference << std::endl;
     std::swap(result[0], result[1]);
     iteration++;

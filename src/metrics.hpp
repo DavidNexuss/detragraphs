@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <queue>
 #include <numeric>
+#include "algorithms.hpp"
 
 namespace graphs {
 
@@ -148,7 +149,6 @@ template <typename GraphT>
 double average_clustering_coefficient(const GraphT& graph) {
   int N = graph.getVertexCount();
   if (N == 0) return 0.0;
-
   double total = 0.0;
 
   for (int i = 0; i < N; i++) {
@@ -156,6 +156,41 @@ double average_clustering_coefficient(const GraphT& graph) {
   }
 
   return total / N;
+}
+
+template <typename GraphT>
+float closeness_centrality(const GraphT& graph, uint64_t source) {
+  std::vector<algorithms::WalkResult> distances = walk_bfs(graph, source);
+
+  double average_distance = 0.0;
+
+  for (size_t i = 0; i < distances.size(); i++)
+    average_distance += distances[i].distanceFromSource;
+
+  return average_distance / (graph.getVertexCount() - 1);
+}
+
+template <typename GraphT>
+std::vector<float> closeness(const GraphT& graph) {
+  std::vector<float> results;
+
+  struct Result {
+    std::vector<float> results;
+  } __attribute__((packed, aligned(64)));
+
+  static_assert((sizeof(Result) % 64) == 0);
+
+  alignas(64) Result partialResults[std::thread::hardware_concurrency()];
+
+#pragma omp parallel for schedule(static)
+  for (size_t i = 0; i < graph.getVertexCount(); i++)
+    partialResults[omp_get_thread_num()].results.push_back(closeness_centrality(graph, i));
+
+  for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
+    for (auto val : partialResults[i].results) results.push_back(val);
+  }
+
+  return results;
 }
 
 } // namespace metrics

@@ -34,7 +34,7 @@ float sd(const std::vector<float>& x) {
   return std::sqrt(deviation / x.size());
 }
 
-float square_differecne(const std::vector<float>& a, const std::vector<float>& b) {
+float square_difference(const std::vector<float>& a, const std::vector<float>& b) {
   if (a.size() != b.size()) return std::numeric_limits<float>::max();
   double accum = 0.0;
   for (size_t i = 0; i < a.size(); i++) {

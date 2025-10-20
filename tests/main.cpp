@@ -4,7 +4,6 @@
 #include "graph.hpp"
 #include "printer.hpp"
 #include "parser.hpp"
-#include <chrono>
 #include <iostream>
 #include "algorithms.hpp"
 #include "util/timer.hpp"
@@ -13,6 +12,7 @@
 #include <thread>
 
 using namespace graphs;
+using namespace detra;
 using namespace graphs::backends;
 
 void benchmark() {
@@ -25,45 +25,30 @@ void benchmark() {
   CGRaph graph;
 
   {
-    auto t0 = std::chrono::high_resolution_clock::now();
-
+    DETRA_TIMER(GraphGeneration);
     graph = generators::erdos_renyi<CGRaph, random_sources::Standard>(200, 0.4);
-
-    auto t1 = std::chrono::high_resolution_clock::now();
-
-    std::cout << "Graph generated in "
-              << std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()
-              << " microseconds\n";
   }
 
   {
-
-    auto t0 = std::chrono::high_resolution_clock::now();
+    DETRA_TIMER(EdgeCounting);
 
     uint64_t total_edges = graph.getEdgeCount();
 
-    auto t1 = std::chrono::high_resolution_clock::now();
-
-    std::cout << "Edge counting: " << total_edges
-              << " edges in "
-              << std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()
-              << " microseconds\n";
+    std::cout << "Edge counting: " << total_edges << " edges.\n";
   }
+
   {
-    auto t0 = std::chrono::high_resolution_clock::now();
+    DETRA_TIMER(FullConnectivityCheck);
 
     size_t connected_count = 0;
     for (size_t i = 0; i < N; ++i)
       for (size_t j = i + 1; j < N; ++j)
         connected_count += graph.isConnected(j, i);
 
-    auto t1 = std::chrono::high_resolution_clock::now();
-
-    std::cout << "Full connectivity check counted " << connected_count
-              << " connections in "
-              << std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count()
-              << " microseconds\n";
+    std::cout << "Full connectivity check counted " << connected_count << " connections.\n";
   }
+
+  math::spectral_radius(parser::convert_matrix(graph));
 }
 
 void test_prefferential() {
@@ -97,7 +82,6 @@ void test_walk() {
 
   std::cout << "\n=== WALK TESTS ===\n";
 
-  // Generate a small connected graph
   G g = generators::erdos_renyi<G, random_sources::XORand>(40, 0.8);
 
   std::cout << "Original Graph:\n";
@@ -122,7 +106,6 @@ void test_walk() {
   std::cout << "\nDFS Tree:\n";
   dfs_tree.print();
 
-  // Metrics comparison: degree sequence difference
   auto deg_g     = metrics::degree_sequence(g);
   auto deg_dfs_t = metrics::degree_sequence(dfs_tree);
   auto deg_bfs_t = metrics::degree_sequence(bfs_tree);
@@ -141,7 +124,6 @@ void test_prim() {
   using G = Graph<backends::AdjacencyMatrixFlat<double>>;
   std::cout << "\n=== PRIM'S MST TEST ===\n";
 
-  // Weighted connected graph
   G g = generators::erdos_renyi<G, random_sources::Standard>(10, 0.4);
 
   std::cout << "Original Weighted Graph:\n";
@@ -151,7 +133,6 @@ void test_prim() {
 
   std::cout << "\nPrim's MST Graph:\n";
 
-  // Compare edge count and approximate total weight
   double totalWeightOriginal = 0.0;
   double totalWeightMST      = 0.0;
   for (size_t u = 0; u < g.getVertexCount(); ++u)
@@ -189,28 +170,21 @@ void test_clustering() {
 
   std::cout << "=== CLUSTERING COEFFICIENT TEST ===\n";
 
-  auto t0 = std::chrono::high_resolution_clock::now();
+  GraphType fullGraph;
 
-  GraphType fullGraph = generators::erdos_renyi<GraphType, random_sources::XORand>(TOTAL_VERTICES, EDGE_PROB);
+  {
+    DETRA_TIMER(GraphGenerationClustering);
+    fullGraph = generators::erdos_renyi<GraphType, random_sources::XORand>(TOTAL_VERTICES, EDGE_PROB);
+    std::cout << "Generated graph of " << TOTAL_VERTICES << " vertices.\n";
+  }
 
-  auto t1 = std::chrono::high_resolution_clock::now();
-
-  std::cout << "Generated graph of " << TOTAL_VERTICES << " vertices in "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count()
-            << " ms\n";
-
-  // progressively sample graph and compute clustering
   std::cout << "SampleSize, ClusteringCoefficient\n";
 
-  t0 = std::chrono::high_resolution_clock::now();
-
-  double C = metrics::average_clustering_coefficient(fullGraph);
-
-  t1 = std::chrono::high_resolution_clock::now();
-
-  std::cout << "Computed all samples in "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count()
-            << " ms\n";
+  {
+    DETRA_TIMER(ClusteringComputationOnly);
+    double C = metrics::average_clustering_coefficient(fullGraph);
+    std::cout << "Computed all samples. Average Clustering Coefficient: " << C << "\n";
+  }
 }
 
 void test_eigensolver_complex() {
@@ -235,7 +209,8 @@ void test_eigensolver_complex() {
 
     auto solution = detra::math::eigenvalues(laplacian);
 
-    for (int i = 0; i < solution.size(); i++) std::cout << solution[i] << std::endl;
+    for (int i = 0; i < solution.size(); i++)
+      std::cout << solution[i] << std::endl;
   }
 
   {
@@ -244,7 +219,6 @@ void test_eigensolver_complex() {
     auto result = detra::math::jacobi(laplacian);
   }
 }
-
 
 int main() {
   Eigen::setNbThreads(std::thread::hardware_concurrency());

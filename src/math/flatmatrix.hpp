@@ -58,6 +58,7 @@ struct FlatMatrix {
   T get(size_t i, size_t j) { return p_data[i * M + j]; }
 
   void apply_inplace(const std::vector<float>& input, std::vector<float>& output) {
+#pragma omp parallel for schedule(static)
     for (size_t i = 0; i < input.size(); i++) {
       double accumulated_value = 0.0;
       for (size_t j = 0; j < N; j++) {
@@ -67,8 +68,7 @@ struct FlatMatrix {
     }
   }
 
-  T*       data() { return p_data.data(); }
-  const T* data() const { return p_data.data(); }
+  T* data() const { return p_data.data(); }
 
   void print() const {
     std::cout << N << "x" << M << " Matrix:\n";
