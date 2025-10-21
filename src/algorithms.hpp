@@ -271,7 +271,6 @@ GraphO sample_graph(const GraphT& graph, uint64_t N) {
     throw std::invalid_argument("Sample size N cannot exceed vertex count.");
 
   std::vector<uint64_t> selected = random_sample(N, M);
-
   std::unordered_map<uint64_t, uint64_t> index_map;
 
   for (uint64_t i = 0; i < N; ++i)

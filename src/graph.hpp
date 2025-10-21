@@ -59,6 +59,7 @@ struct Graph {
    * Checks if two nodes in the graph are connected.
    * Assumes underlying representation only has directed edges, in that case the order of edged checking is to < from, if
    * another order is provided the function will swap the values automatically.
+   * @returns If its connected
    */
   inline bool isConnectedUndirected(uint64_t from, uint64_t to) const {
     if (to > from) std::swap(to, from);
@@ -72,10 +73,15 @@ struct Graph {
 
   /**
    * Returns the vertices that are adjacent to a particular vertex
+   * @returns The list of vertices
    */
   inline std::vector<uint64_t> getEdges(uint64_t vertex) const { return data.getEdges(vertex); }
 
-
+  /**
+   * Returns a list of vertices that connect to a given a vertex.cA
+   * @param vertex The vertex
+   * @result The list of given vertices
+   */
   inline std::vector<uint64_t> getInvertedEdges(uint64_t vertex) const { return data.getInvertedEdges(vertex); }
 
   inline void print() {
@@ -84,6 +90,7 @@ struct Graph {
 
   /**
    * Returns the weight of a particular connection of two vertices
+   * @returns The weight
    */
   inline float getEdgeWeight(uint64_t u, uint64_t v) const {
     return 1.0f;

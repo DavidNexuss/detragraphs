@@ -2,14 +2,13 @@
 #include <vector>
 #include <cstdint>
 #include <queue>
+#include <thread>
 #include <numeric>
 #include "algorithms.hpp"
 #include "graph.hpp"
 
 namespace graphs {
-
 namespace metrics {
-
 
 /**
  * Returns the degree sequence of the graph, that is, a vector where the ith value indicates the degree of the node i
@@ -111,8 +110,44 @@ float closeness_centrality(const GraphT& graph, uint64_t source) {
   return average_distance / (graph.getVertexCount() - 1);
 }
 
+/**
+ * @brief Computes the shortest path distance matrix 
+ * for a weighted, directed graph using the Floyd-Warshall algorithm.
+ *
+ * @tparam GraphT The graph type.
+ * @param[in] graph The input graph (passed by reference) for which the distance matrix is computed.
+ * @return A 2D vector of floats representing the distance matrix, where `dist[i][j]` is the shortest path distance.
+ */
 template <typename GraphT>
 std::vector<std::vector<float>> distance_matrix(GraphT& graph) { 
+  uint64_t n = graph.getVertexCount(); 
+
+  const float INF = std::numeric_limits<float>::infinity();
+  std::vector<std::vector<float>> dist(n, std::vector<float>(n, INF));
+
+  for (uint64_t i = 0; i < n; ++i) {
+    dist[i][i] = 0.0f;
+  }
+
+  for (uint64_t u = 0; u < n; ++u) {
+    for (uint64_t v = 0; v < n; ++v) {
+      if (graph.isConnected(u, v)) { 
+        dist[u][v] = graph.getEdgeWeight(u, v); 
+      }
+    }
+  }
+
+  for (uint64_t k = 0; k < n; ++k) {
+    for (uint64_t i = 0; i < n; ++i) {
+      for (uint64_t j = 0; j < n; ++j) { 
+        if (dist[i][k] != INF && dist[k][j] != INF) {
+          dist[i][j] = std::min(dist[i][j], dist[i][k] + dist[k][j]);
+        }
+      }
+    }
+  }
+
+  return dist;
 
 }
 

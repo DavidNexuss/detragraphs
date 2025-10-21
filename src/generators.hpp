@@ -3,10 +3,20 @@
 #include <detrarandom/random_sources.hpp>
 #include <stdexcept>
 #include <vector>
+#include "algorithms.hpp"
 #include "graph.hpp"
 
 namespace graphs {
 
+/**
+ * @brief Graph generation algorithms for creating various random graph models.
+ * This file contains implementations of random graph generation algorithms,
+ * including
+ * Erdos-Renyi, Barabasi-Albert, Watts-Strogatz, Preferential Directed, and
+ * Recursive Tree models.
+ * All generators are templated to support different graph types and random
+ *number sources.
+ **/
 namespace generators {
 
 /**
@@ -31,10 +41,16 @@ GraphT erdos_renyi(uint64_t n, double p, RandomSource randomSource = RandomSourc
   return g;
 }
 
-/*
+/**
+ * Switch model generator
+ * @param input The input graph
+ * @param switches The number of switches
+ * @param randomSource The random source (by default constructed specified in templated)
+ * @returns The graph within the switch model generator
+ **/
 template <typename GraphInput, typename GraphOutput, typename RandomSource>
 GraphOutput switch_model(const GraphInput& input, int switches, RandomSource randomSource = RandomSource{}) {
-  std::vector<std::pair<uint32_t, uint32_t>> edgelist = toedgelist(input);
+  std::vector<std::pair<uint32_t, uint32_t>> edgelist = algorithms::to_edge_list(input);
 
   for (size_t i = 0; i < switches; i++) {
     std::pair<uint32_t, uint32_t> edgeSource;
@@ -65,9 +81,9 @@ GraphOutput switch_model(const GraphInput& input, int switches, RandomSource ran
     edgelist[edgeSourceIndex] = edgeSource;
     edgelist[edgeTargetIndex] = edgeTarget;
   }
-  fromedgelist(edgelist);
+  return algorithms::from_edge_list<GraphOutput>(edgelist);
 }
-*/
+
 
 /**
  * Generate a Barabasi Albert graph with n vertices 
@@ -137,38 +153,58 @@ GraphT watts_strogatz(uint64_t n, uint64_t k, double beta, RandomSource randomSo
   return g;
 }
 
-//Relaxed version of barabasi albert, faster to compute while retaining power scaling nature
-//TODO: Prevent double edge addition
-//TODO: Fix and correct
-
+/**
+ * Returns a preferential directed generated graph using a given number of vertices and number of edges
+ * @param n The nmber of vertices
+ * @param e The number of edges
+ * @param randomSource The randomSource used
+ * @returns The graph
+ **/
 template <typename GraphT, typename RandomSource>
-GraphT prefferential_directed(uint64_t n, uint64_t e, RandomSource randomSource = RandomSource{}) {
+GraphT preferential_directed(uint64_t n, uint64_t e, RandomSource randomSource = RandomSource{}) {
   GraphT g;
-  g.addVertices(n);
+  g.addVertices(n); 
 
-  std::vector<uint64_t> preferentialNodes(n);
-  for (int i = 0; i < preferentialNodes.size(); i++)
-    preferentialNodes[i] = i;
+  std::vector<uint64_t> preferentialNodes;
+  preferentialNodes.reserve(2 * e); 
 
-  std::vector<uint64_t> degrees(n);
 
-  for (int i = 0; i < e; i++) {
-    int u = i % n;
-    int v = u;
+  for (uint64_t i = 0; i < n; ++i) {
+    preferentialNodes.push_back(i); 
+  }
 
-    while(u == v || g.isConnected(u, v)) 
+  std::vector<uint64_t> inDegrees(n, 1); 
+
+  for (uint64_t i = 0; i < e; ++i) {
+    uint64_t u = i % n; 
+    uint64_t v = u;
+
+    size_t max_attempts = 10; 
+    while (u == v || g.isConnected(v, u)) {
       v = preferentialNodes[randomSource.randi() % preferentialNodes.size()];
+      if (--max_attempts == 0) {
+        v = n; 
+        break;
+      }
+    }
 
-    if (u != v) {
-      g.addEdge(v, u);
-      preferentialNodes.push_back(v);
-      degrees[v]++;
+    if (v < n && u != v) {
+      g.addEdge(v, u); 
+      preferentialNodes.push_back(v); 
+      inDegrees[v]++; 
     }
   }
 
   return g;
 }
 
+/**
+ * Generates a recursive tree
+ * @param levels The number of levels of the tree
+ * @param maxlevelcount The maximum number of vertices in each level
+ * @param p The probability to spawn a node in a given levle
+ * @returns The graph
+ */
 template <typename GraphT, typename RandomSource>
 GraphT recursive_tree(uint64_t levels, uint64_t maxlevelcount, float p, RandomSource randomSource = RandomSource{}) {
   GraphT g;
