@@ -38,7 +38,19 @@ struct AdjacencyMatrix {
         neighbours.push_back(u);
       u++;
     }
+
     return neighbours;
+  }
+
+  std::vector<uint64_t> getInvertedEdges(uint64_t vertex) const {
+    std::vector<uint64_t> result;
+
+    for (size_t i = 0; i < mat.size(); i++) {
+      if (mat[i][vertex]) {
+        result.push_back(i);
+      }
+    }
+    return result;
   }
 
   void addEdge(uint64_t from, uint64_t to) {
@@ -99,6 +111,18 @@ struct AdjacencyMatrixFlat {
       u++;
     }
     return neighbours;
+  }
+
+  std::vector<uint64_t> getInvertedEdges(uint64_t vertex) const {
+    std::vector<uint64_t> result;
+
+    for (size_t i = 0; i < mat.size(); i++) {
+      uint64_t index = i * N + vertex;
+      if (mat[index]) {
+        result.push_back(i);
+      }
+    }
+    return result;
   }
 
   void addEdge(uint64_t from, uint64_t to) {
@@ -187,7 +211,6 @@ struct AdjacencyMatrixRange {
 };
 
 struct AdjacencyMatrixHash {
-
   struct pair_hash {
     std::size_t operator()(const std::pair<uint64_t, uint64_t>& p) const noexcept {
       std::size_t h1 = std::hash<uint64_t>{}(p.first);

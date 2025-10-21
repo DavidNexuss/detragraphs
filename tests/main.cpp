@@ -191,33 +191,27 @@ void test_eigensolver_complex() {
   DETRA_TIMER(EigenSolver)
 
   using GraphType = Graph<backends::AdjacencyMatrixFlat<float>>;
-
-  GraphType fullGraph;
-
-  {
-    DETRA_TIMER(EigenSolverGeneration)
-    fullGraph = generators::prefferential_directed<GraphType, random_sources::XORand>(200, 1200);
-  }
-
-  detra::math::FlatMatrix<float> laplacian;
-  {
-    DETRA_TIMER(EigenSolverLaplacian)
-    laplacian = metrics::laplacian_matrix(fullGraph);
-  }
+  math::FlatMatrix<float> matrix;
 
   {
-    DETRA_TIMER(EigenSolverComputation)
+    GraphType fullGraph;
+    int       N = 150;
+    int       R = 4000;
+    DETRA_TIMER(JacobiGeneration)
 
-    auto solution = detra::math::eigenvalues(laplacian);
+    fullGraph = generators::prefferential_directed<GraphType, random_sources::XORand>(N * N, N * N * R);
 
-    for (int i = 0; i < solution.size(); i++)
-      std::cout << solution[i] << std::endl;
+    std::cout << "Graph of N: " << N * N << " vertices " << std::endl;
+    std::cout << "Graph of R: " << N * N * R << " edges " << std::endl;
+
+    matrix = parser::convert_matrix(std::move(fullGraph));
   }
 
   {
     DETRA_TIMER(Jacobi)
-    detra::math::row_normalize(laplacian);
-    auto result = detra::math::jacobi(laplacian);
+
+    detra::math::row_normalize(matrix);
+    auto result = detra::math::jacobi(matrix);
   }
 }
 

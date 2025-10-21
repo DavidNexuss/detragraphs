@@ -1,4 +1,7 @@
+#pragma once
+#include <cstddef>
 #include <cstdint>
+#include <utility>
 #include <vector>
 #include <limits>
 #include <queue>
@@ -6,7 +9,6 @@
 #include <random>
 #include <algorithm>
 #include <stdexcept>
-#include <thread>
 #include <omp.h>
 #include <assert.h>
 
@@ -73,6 +75,9 @@ std::vector<WalkResult> walk_bfs(const GraphT& graph, uint64_t source) {
   return result;
 }
 
+/**
+ * Returns BFS tree
+ */
 template <typename GraphT, typename GraphO>
 GraphO walk_bfs_tree(const GraphT& graph, uint64_t source) {
   int    N = graph.getVertexCount();
@@ -99,7 +104,6 @@ GraphO walk_bfs_tree(const GraphT& graph, uint64_t source) {
   }
   return tree;
 }
-
 // === DFS TREE (returns GraphT) ===
 template <typename GraphT, typename GraphO>
 void dfs_tree_recursive(const GraphT& graph, GraphO& tree, uint64_t u, std::vector<char>& visited) {
@@ -112,6 +116,10 @@ void dfs_tree_recursive(const GraphT& graph, GraphO& tree, uint64_t u, std::vect
   }
 }
 
+
+/**
+ * Performs a BFS walk around the graph
+ */
 template <typename GraphT, typename GraphO>
 GraphO walk_dfs_tree(const GraphT& graph, uint64_t source) {
   int    N = graph.getVertexCount();
@@ -124,6 +132,21 @@ GraphO walk_dfs_tree(const GraphT& graph, uint64_t source) {
   return tree;
 }
 
+/**
+ *  Converts a graph to an edge list
+ */
+template  <typename  GraphT>
+std::vector<std::pair<uint64_t, uint64_t>> to_edge_list(GraphT& graph) {
+  std::vector<std::pair<uint64_t, uint64_t>> edgelist;
+  for (size_t i = 0; i < graph.getVertexCount(); i++) {
+    for(uint64_t u : graph.getEdges(i)) edgelist.push_back({i, u});
+  }
+  return edgelist;
+}
+
+/**
+ * Converts an edge list to a graph
+ */
 template <typename GraphT>
 GraphT from_edge_list(const std::vector<std::pair<uint64_t, uint64_t>>& edges) {
   GraphT graph;
@@ -145,6 +168,9 @@ GraphT from_edge_list(const std::vector<std::pair<uint64_t, uint64_t>>& edges) {
 }
 
 
+/**
+ * Runs prim algorithm and returns the tree in a edge list
+ */
 template <typename GraphT>
 std::vector<std::pair<uint64_t, uint64_t>> prim(const GraphT& graph, uint64_t start = 0) {
   int N = graph.getVertexCount();
@@ -184,6 +210,9 @@ std::vector<std::pair<uint64_t, uint64_t>> prim(const GraphT& graph, uint64_t st
   return mstEdges;
 }
 
+/**
+ * Runs dijkstra algorithm
+ */
 template <typename GraphT>
 std::vector<WalkResult> dijkstra(const GraphT& graph, uint64_t source) {
   int                     N = graph.getVertexCount();
@@ -216,6 +245,9 @@ std::vector<WalkResult> dijkstra(const GraphT& graph, uint64_t source) {
   return result;
 }
 
+/**
+ * Generates randoms sample of N elements from a vector indexed from 0:M
+ */
 inline std::vector<uint64_t> random_sample(uint64_t N, uint64_t M) {
   if (N > M)
     throw std::invalid_argument("Sample size N cannot exceed range M.");

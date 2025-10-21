@@ -4,11 +4,17 @@
 #include <queue>
 #include <numeric>
 #include "algorithms.hpp"
+#include "graph.hpp"
 
 namespace graphs {
 
 namespace metrics {
 
+
+/**
+ * Returns the degree sequence of the graph, that is, a vector where the ith value indicates the degree of the node i
+ * @param graph The graph
+ **/
 template <typename GraphT>
 std::vector<uint32_t> degree_sequence(const GraphT& graph) {
   int N = graph.getVertexCount();
@@ -22,6 +28,10 @@ std::vector<uint32_t> degree_sequence(const GraphT& graph) {
   return degrees;
 }
 
+/**
+ * Returns the average degree of a graph
+ * @returns The average degree
+ **/
 template <typename GraphT>
 double average_degree(const GraphT& graph) {
   auto   deg = degree_sequence(graph);
@@ -29,6 +39,10 @@ double average_degree(const GraphT& graph) {
   return deg.empty() ? 0.0 : sum / static_cast<double>(deg.size());
 }
 
+/**
+ * Returns the density for agvien graph, that is 2E / (N * (N - 1))
+ * @returns The density
+ **/
 template <typename GraphT>
 double density(const GraphT& graph) {
   double N = static_cast<double>(graph.getVertexCount());
@@ -37,99 +51,16 @@ double density(const GraphT& graph) {
   return (2.0 * E) / (N * (N - 1.0));
 }
 
-template <typename GraphT>
-uint32_t connected_components(const GraphT& graph) {
-  int               N = graph.getVertexCount();
-  std::vector<bool> visited(N, false);
-  uint32_t          components = 0;
-  std::queue<int>   q;
-
-  for (int i = 0; i < N; i++) {
-    if (visited[i]) continue;
-    components++;
-    q.push(i);
-    visited[i] = true;
-
-    while (!q.empty()) {
-      int u = q.front();
-      q.pop();
-      for (auto v : graph.getEdges(u)) {
-        if (!visited[v]) {
-          visited[v] = true;
-          q.push(v);
-        }
-      }
-    }
-  }
-
-  return components;
-}
-
-template <typename GraphT>
-double average_shortest_path_length(const GraphT& graph) {
-  int N = graph.getVertexCount();
-  if (N <= 1) return 0.0;
-
-  double   total = 0.0;
-  uint64_t pairs = 0;
-
-  for (int src = 0; src < N; src++) {
-    std::vector<int> dist(N, -1);
-    std::queue<int>  q;
-    dist[src] = 0;
-    q.push(src);
-
-    while (!q.empty()) {
-      int u = q.front();
-      q.pop();
-      for (auto v : graph.getEdges(u)) {
-        if (dist[v] == -1) {
-          dist[v] = dist[u] + 1;
-          q.push(v);
-        }
-      }
-    }
-
-    for (int i = 0; i < N; i++) {
-      if (i != src && dist[i] > 0) {
-        total += dist[i];
-        pairs++;
-      }
-    }
-  }
-
-  return pairs > 0 ? total / pairs : 0.0;
-}
-
-template <typename GraphT>
-uint32_t diameter(const GraphT& graph) {
-  int      N       = graph.getVertexCount();
-  uint32_t maxDist = 0;
-
-  for (int src = 0; src < N; src++) {
-    std::vector<int> dist(N, -1);
-    std::queue<int>  q;
-    dist[src] = 0;
-    q.push(src);
-
-    while (!q.empty()) {
-      int u = q.front();
-      q.pop();
-      for (auto v : graph.getEdges(u)) {
-        if (dist[v] == -1) {
-          dist[v] = dist[u] + 1;
-          q.push(v);
-        }
-      }
-    }
-
-    for (int d : dist)
-      if (d > maxDist) maxDist = d;
-  }
-
-  return maxDist;
-}
-
+/**
+ * Computes the clustering coefficient for a gvien node.
+ * That is
+ * 
+ * S <- neighbours(v)
+ * result <- (sum i, j isConnected(i, j) for i <- S, j <- S ) / (|S| * (|S| - 1))
+ * 
+ * @returns result
+ * 
+ **/
 template <typename GraphT>
 double clustering_coefficient(const GraphT& graph, uint64_t v) {
   auto neighbors = graph.getEdges(v);
@@ -145,6 +76,10 @@ double clustering_coefficient(const GraphT& graph, uint64_t v) {
   return (2.0 * links) / (k * (k - 1));
 }
 
+/**
+ * Computes the average clustering coefficient of the graph, that is the mean of all clustering coefficients
+ * @returns The average clustering coefficient
+ */
 template <typename GraphT>
 double average_clustering_coefficient(const GraphT& graph) {
   int N = graph.getVertexCount();
@@ -158,6 +93,12 @@ double average_clustering_coefficient(const GraphT& graph) {
   return total / N;
 }
 
+/**
+ * Returns the closeness centrality, that is, the average of distances between a vertex and the other vertices of the network
+ * Assumes the graph only has a one connected component
+ * Uses the BFS algorithm
+ * @returns The closeness
+ */
 template <typename GraphT>
 float closeness_centrality(const GraphT& graph, uint64_t source) {
   std::vector<algorithms::WalkResult> distances = walk_bfs(graph, source);
@@ -170,6 +111,16 @@ float closeness_centrality(const GraphT& graph, uint64_t source) {
   return average_distance / (graph.getVertexCount() - 1);
 }
 
+template <typename GraphT>
+std::vector<std::vector<float>> distance_matrix(GraphT& graph) { 
+
+}
+
+/**
+ * Returns the closeness centrality for each vertex
+ * Calls the closeness_centrality function
+ * @returns The closeness centrality vector
+ */
 template <typename GraphT>
 std::vector<float> closeness(const GraphT& graph) {
   std::vector<float> results;

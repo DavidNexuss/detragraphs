@@ -1,11 +1,16 @@
 #include <vector>
+#include <iostream>
+#include <type_traits>
+#include <utility>
 
+// --- Type trait to detect std::vector ---
 template <typename T>
 struct is_vector : std::false_type {};
 
 template <typename T, typename A>
 struct is_vector<std::vector<T, A>> : std::true_type {};
 
+// --- Recursive mapf: applies function to nested vectors ---
 template <typename Container, typename F>
 auto mapf(const Container& source, F&& function) {
   if constexpr (is_vector<Container>::value) {
@@ -22,7 +27,25 @@ auto mapf(const Container& source, F&& function) {
 
 template <typename F>
 auto mapexec(F&& function, size_t start, size_t end) {
-  std::vector<decltype(std::forward<F>(function))> values;
-  for (size_t i = start; i < end; i++) { values[i] = function(i); }
+  using ReturnType = decltype(function(start));
+  std::vector<ReturnType> values;
+  values.reserve(end - start);
+  for (size_t i = start; i < end; ++i)
+    values.push_back(function(i));
   return values;
+}
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
+  os << "[";
+  for (size_t i = 0; i < v.size(); ++i) {
+    if constexpr (is_vector<T>::value)
+      os << v[i]; // recurse automatically
+    else
+      os << v[i];
+    if (i + 1 < v.size())
+      os << ", ";
+  }
+  os << "]";
+  return os;
 }

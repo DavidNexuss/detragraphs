@@ -6,7 +6,7 @@
 namespace graphs {
 namespace stats {
 
-float mean(const std::vector<float>& values) {
+inline float mean(const std::vector<float>& values) {
   double value = 0.0f;
   for (size_t i = 0; i < values.size(); i++) {
     value += values[i];
@@ -15,7 +15,7 @@ float mean(const std::vector<float>& values) {
 }
 
 
-float dotprod(const std::vector<float>& a, const std::vector<float>& b) {
+inline float dotprod(const std::vector<float>& a, const std::vector<float>& b) {
   if (a.size() != b.size()) return 0.0;
   double value = 0.0;
   for (size_t i = 0; i < a.size(); i++) {
@@ -24,7 +24,7 @@ float dotprod(const std::vector<float>& a, const std::vector<float>& b) {
   return value;
 }
 
-float sd(const std::vector<float>& x) {
+inline float sd(const std::vector<float>& x) {
   double avg       = mean(x);
   double deviation = 0.0;
 
@@ -34,7 +34,7 @@ float sd(const std::vector<float>& x) {
   return std::sqrt(deviation / x.size());
 }
 
-float square_difference(const std::vector<float>& a, const std::vector<float>& b) {
+inline float square_difference(const std::vector<float>& a, const std::vector<float>& b) {
   if (a.size() != b.size()) return std::numeric_limits<float>::max();
   double accum = 0.0;
   for (size_t i = 0; i < a.size(); i++) {

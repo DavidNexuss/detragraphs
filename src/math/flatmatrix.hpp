@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include <type_traits>
+#include <iostream>
 
 namespace detra {
 namespace math {
@@ -21,6 +22,9 @@ struct FlatMatrix {
 
   FlatMatrix(size_t _N, size_t _M, const std::vector<T>& _data) :
     N(_N), M(_M), p_data(_data) {}
+
+  FlatMatrix(size_t _N, size_t _M, std::vector<T>&& _data) :
+    N(_N), M(_M), p_data(std::move(_data)) {}
 
 
   struct FlatMatrixProxy {
@@ -55,20 +59,18 @@ struct FlatMatrix {
   size_t getColumnCount() const { return M; }
   size_t getRowCount() const { return N; }
 
-  T get(size_t i, size_t j) { return p_data[i * M + j]; }
+  inline T get(size_t i, size_t j) { return p_data[i * M + j]; }
 
   void apply_inplace(const std::vector<float>& input, std::vector<float>& output) {
-#pragma omp parallel for schedule(static)
-    for (size_t i = 0; i < input.size(); i++) {
-      double accumulated_value = 0.0;
-      for (size_t j = 0; j < N; j++) {
-        accumulated_value += get(i, j) * input[j];
-      }
-      output[i] = accumulated_value;
-    }
+    std::fill(output.begin(), output.end(), 0.0);
+    for (size_t i = 0; i < N; ++i)
+      for (size_t j = 0; j < N; ++j)
+        output[j] += input[i] * p_data[i * M + j];
   }
 
-  T* data() const { return p_data.data(); }
+
+  const T*
+  data() const { return p_data.data(); }
 
   void print() const {
     std::cout << N << "x" << M << " Matrix:\n";

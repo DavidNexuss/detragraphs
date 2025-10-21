@@ -11,6 +11,12 @@ namespace parser {
 
 using GraphJsonRepresentation = std::map<uint64_t, std::vector<uint64_t>>;
 
+
+/**
+ * Returns a graph from a JsonRepresentation coded in a std::string.
+ * @param data The json representation of the graph, check documentation to see some examples.
+ * @returns the Graph
+ */
 template <typename GraphT>
 GraphT fromjson(const std::string& data) {
   GraphT result;
@@ -29,6 +35,11 @@ GraphT fromjson(const std::string& data) {
   return result;
 }
 
+/**
+ * Encodes the graph into a json.
+ * @param graph The graph.
+ * @returns The string with the encoded json of the graph.
+ */
 template <typename GraphT>
 std::string tojson(const GraphT& graph) {
   GraphJsonRepresentation representation;
