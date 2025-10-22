@@ -2,7 +2,6 @@
 #include "graphbackend/graphbackend.hpp"
 #include "metrics.hpp"
 #include "graph.hpp"
-#include "printer.hpp"
 #include "parser.hpp"
 #include <iostream>
 #include "algorithms.hpp"
@@ -10,6 +9,7 @@
 #include "metrics/spectral.hpp"
 #include "math/eigen.hpp"
 #include <thread>
+#include <util/vector_utils.hpp>
 
 using namespace graphs;
 using namespace detra;
@@ -52,11 +52,11 @@ void benchmark() {
 }
 
 void test_prefferential() {
-  printer::vector(metrics::degree_sequence(generators::prefferential_directed<backends::AdjacencyListVector, random_sources::XORand>(400, 9000)));
+  std::cout << metrics::degree_sequence(generators::preferential_directed<backends::AdjacencyListVector, random_sources::XORand>(400, 9000)) << std::endl;
 }
 
 void test_tree() {
-  printer::vector(metrics::degree_sequence(generators::recursive_tree<backends::AdjacencyListVector, random_sources::XORand>(7, 3, 0.9)));
+  std::cout << metrics::degree_sequence(generators::recursive_tree<backends::AdjacencyListVector, random_sources::XORand>(7, 3, 0.9)) << std::endl;
 }
 
 void test_json_write() {
@@ -111,13 +111,13 @@ void test_walk() {
   auto deg_bfs_t = metrics::degree_sequence(bfs_tree);
 
   std::cout << "\nOriginal Degree Sequence:\n";
-  printer::vector(deg_g);
+  std::cout << deg_g << std::endl;
 
   std::cout << "DFS Tree Degree Sequence:\n";
-  printer::vector(deg_dfs_t);
+  std::cout << deg_dfs_t << std::endl;
 
   std::cout << "BFS Tree Degree Sequence:\n";
-  printer::vector(deg_bfs_t);
+  std::cout << deg_bfs_t<< std::endl;
 }
 
 void test_prim() {
@@ -199,7 +199,7 @@ void test_eigensolver_complex() {
     int       R = 4000;
     DETRA_TIMER(JacobiGeneration)
 
-    fullGraph = generators::prefferential_directed<GraphType, random_sources::XORand>(N * N, N * N * R);
+    fullGraph = generators::preferential_directed<GraphType, random_sources::XORand>(N * N, N * N * R);
 
     std::cout << "Graph of N: " << N * N << " vertices " << std::endl;
     std::cout << "Graph of R: " << N * N * R << " edges " << std::endl;
