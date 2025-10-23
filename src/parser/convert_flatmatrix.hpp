@@ -19,7 +19,6 @@ detra::math::FlatMatrix<float> convert_matrix(const G& graph) {
   return matrix;
 }
 
-
 inline detra::math::FlatMatrix<float> convert_matrix(const Graph<backends::AdjacencyMatrixFlat<float>>& graph) {
   size_t N = graph.getVertexCount();
   return detra::math::FlatMatrix<float>(N, N, graph.data.mat);
@@ -29,7 +28,6 @@ inline detra::math::FlatMatrix<float> convert_matrix(Graph<backends::AdjacencyMa
   size_t N = graph.getVertexCount();
   return detra::math::FlatMatrix<float>(N, N, std::move(graph.data.mat));
 }
-
 
 } // namespace parser
 } // namespace graphs
