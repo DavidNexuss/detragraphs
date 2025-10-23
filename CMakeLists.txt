@@ -30,10 +30,7 @@ target_include_directories(detragraphs
 
 # Existing external dependencies
 include_directories(lib/detrarandom)
-include_directories(lib/eigen)
-
 add_subdirectory(lib/detrarandom)
-add_subdirectory(lib/eigen)
 
 # Existing test executables (now link against the new target)
 add_executable(detragraphs_test tests/main.cpp)
