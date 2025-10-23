@@ -6,8 +6,8 @@
 #include <iostream>
 
 namespace graphs {
-
 namespace backends {
+
 struct AdjacencyListVector {
   std::vector<std::vector<uint64_t>> adj;
 
@@ -192,17 +192,17 @@ struct CompressedAdjacencyWeighted {
       neighbours.push_back(edge.first);
     return neighbours;
   }
-  
+
   /**
    * @brief Gets the indices and weights of all neighbors connected by outgoing edges.
    * @param vertex The index of the source vertex.
    * @return A vector of (neighbor_index, weight) pairs.
    */
   const std::vector<std::pair<uint64_t, edgeType>>& getEdgesWeighted(uint64_t vertex) const {
-      // Return a reference to the internal list for efficiency
-      static const std::vector<std::pair<uint64_t, edgeType>> empty_vec = {};
-      if (vertex >= adj_list.size()) return empty_vec;
-      return adj_list[vertex];
+    // Return a reference to the internal list for efficiency
+    static const std::vector<std::pair<uint64_t, edgeType>> empty_vec = {};
+    if (vertex >= adj_list.size()) return empty_vec;
+    return adj_list[vertex];
   }
 
   /**
@@ -232,7 +232,7 @@ struct CompressedAdjacencyWeighted {
    */
   void addEdge(uint64_t from, uint64_t to, edgeType weight = edgeType{}) {
     if (from == to || from >= adj_list.size() || to >= adj_list.size()) return;
-    
+
     // Check if edge already exists and update
     auto& neighbors = adj_list[from];
     for (auto& edge : neighbors) {
@@ -260,7 +260,7 @@ struct CompressedAdjacencyWeighted {
     }
     return false;
   }
-  
+
   /**
    * @brief Retrieves the weight of a directed edge.
    * @param from The source vertex.
@@ -268,11 +268,11 @@ struct CompressedAdjacencyWeighted {
    * @return The weight of the edge, or edgeType{} if the edge does not exist.
    */
   edgeType getWeight(uint64_t from, uint64_t to) const {
-      if (from >= adj_list.size()) return edgeType{};
-      for (const auto& edge : adj_list[from]) {
-          if (edge.first == to) return edge.second;
-      }
-      return edgeType{};
+    if (from >= adj_list.size()) return edgeType{};
+    for (const auto& edge : adj_list[from]) {
+      if (edge.first == to) return edge.second;
+    }
+    return edgeType{};
   }
 
   /**
@@ -306,12 +306,12 @@ struct CompressedAdjacencyWeighted {
   */
   CompressedAdjacencyWeighted<edgeType> getInverseGraph() const {
     CompressedAdjacencyWeighted<edgeType> inverse_graph;
-    uint64_t num_vertices = getVertexCount();
+    uint64_t                              num_vertices = getVertexCount();
     inverse_graph.addVertices(num_vertices);
 
     for (uint64_t from = 0; from < num_vertices; ++from) {
       for (const auto& edge : adj_list[from]) {
-        uint64_t to = edge.first;
+        uint64_t to     = edge.first;
         edgeType weight = edge.second;
         inverse_graph.addEdge(to, from, weight);
       }

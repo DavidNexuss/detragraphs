@@ -4,14 +4,12 @@
 #include <type_traits>
 #include <utility>
 
-// --- Type trait to detect std::vector ---
 template <typename T>
 struct is_vector : std::false_type {};
 
 template <typename T, typename A>
 struct is_vector<std::vector<T, A>> : std::true_type {};
 
-// --- Recursive mapf: applies function to nested vectors ---
 template <typename Container, typename F>
 auto mapf(const Container& source, F&& function) {
   if constexpr (is_vector<Container>::value) {

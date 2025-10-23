@@ -28,16 +28,15 @@ struct SparseInverseDirectory {
                 [](auto& a, auto& b) { return a.first < b.first; });
   }
 
-  void apply_inplace(const SparseVector &x, std::vector<float> &y) {
+  inline void apply_inplace(const SparseVector& x, std::vector<float>& y) {
     y.assign(N, 0.0f);
-    for (const auto &[col, xv] : x.data) {
+    for (const auto& [col, xv] : x.data) {
       if (col >= M)
         continue;
-      for (const auto &[row, val] : inv_dir[col])
+      for (const auto& [row, val] : inv_dir[col])
         y[row] += val * xv;
     }
   }
-
 };
 } // namespace math
-}
+} // namespace detra

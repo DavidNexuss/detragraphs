@@ -3,7 +3,6 @@
 #include <cmath>
 
 namespace detra {
-
 namespace math {
 
 struct SparseVector {
@@ -16,7 +15,7 @@ struct SparseVector {
 
   SparseVector(const std::vector<float>& x, float tol = 1e-6f) {
     M = static_cast<int>(x.size());
-    
+
     for (int i = 0; i < M; ++i)
       if (std::fabs(x[i]) > tol) data.emplace_back(i, x[i]);
   }

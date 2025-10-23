@@ -5,7 +5,6 @@
 #include <iostream>
 
 namespace graphs {
-
 namespace backends {
 
 template <typename edgeType = bool>

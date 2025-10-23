@@ -8,7 +8,6 @@
 #include "../position.hpp"
 
 namespace graphs {
-
 namespace position {
 
 struct KamadaKawaiCreateInfo {

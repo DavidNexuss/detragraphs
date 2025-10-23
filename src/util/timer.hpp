@@ -4,6 +4,7 @@
 
 namespace detra {
 namespace util {
+
 struct Timer {
   std::chrono::time_point<std::chrono::high_resolution_clock> t0;
   std::string                                                 regioname;

@@ -6,6 +6,9 @@
 #include <fcntl.h>
 
 namespace detra {
+/* 
+* @brief Interface for reading and writing, based on Unis systems file IO APis
+* */
 struct IOAdapter {
   virtual int      open(const std::string& filename)                = 0;
   virtual uint64_t filesize(int fd)                                 = 0;
