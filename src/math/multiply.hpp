@@ -6,7 +6,7 @@ namespace detra {
 namespace math {
 
 template <typename Matrix>
-inline typename Matrix::Vector jacobi(Matrix& matrix) {
+inline typename Matrix::Vector jacobi(const Matrix& matrix) {
   using Vector = typename Matrix::Vector;
 
   if (matrix.N != matrix.M) return {};
@@ -28,13 +28,12 @@ inline typename Matrix::Vector jacobi(Matrix& matrix) {
   do {
     matrix.apply_inplace(result[0], result[1]);
     difference = graphs::stats::square_difference(result[0], result[1]);
-    std::cerr << iteration << " " << difference << std::endl;
     std::swap(result[0], result[1]);
     iteration++;
   } while (difference > 1e-7f && iteration < maxiterations);
 
   std::cerr << "Iterations: " << iteration << std::endl;
-  std::cerr << "Difference: " << difference << std::endl;
+  std::cerr << "Delta: " << difference << std::endl;
 
   return result[0];
 }
