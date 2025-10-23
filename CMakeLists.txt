@@ -1,23 +1,22 @@
 cmake_minimum_required(VERSION 3.10)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_FLAGS_DEBUG "-fsanitize=address -g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ftree-vectorize -march=native -fopenmp")
-set(CMAKE_COMPILE_WARNING_AS_ERROR OFF)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_STANDARD 20)
-set(DOXYGEN_GENERATE_TREEVIEW YES)
 
 project(detragraphs)
 
-find_package(OpenMP)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_COMPILE_WARNING_AS_ERROR OFF)
 
-file(GLOB_RECURSE SRC 
-  tests/*.cpp
-)
+set(CMAKE_CXX_FLAGS_DEBUG "-fsanitize=address -g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ftree-vectorize -march=native")
 
-file(GLOB_RECURSE INCLUDE_SRC
-  src/*.cpp
-)
+find_package(OpenMP REQUIRED)
+
+if(OpenMP_CXX_FOUND)
+    message(STATUS "OpenMP found: ${OpenMP_CXX_FLAGS}")
+endif()
+
+file(GLOB_RECURSE SRC tests/*.cpp)
+file(GLOB_RECURSE INCLUDE_SRC src/*.cpp)
 
 include_directories(lib/detrarandom)
 include_directories(lib/eigen)
@@ -25,10 +24,10 @@ include_directories(lib/eigen)
 add_subdirectory(lib/detrarandom)
 add_subdirectory(lib/eigen)
 
-# add_library(detragraphs ${INCLUDE_SRC})
-# target_link_libraries(detragraphs detrarandom)
-
 add_executable(detragraphs_test ${SRC})
-
 target_include_directories(detragraphs_test PRIVATE src)
-target_link_libraries(detragraphs_test eigen)
+
+target_link_libraries(detragraphs_test PRIVATE OpenMP::OpenMP_CXX)
+
+target_compile_options(detragraphs_test PRIVATE ${OpenMP_CXX_FLAGS})
+

@@ -6,9 +6,7 @@
 #include <iostream>
 #include "algorithms.hpp"
 #include "util/timer.hpp"
-#include "metrics/spectral.hpp"
-#include "math/eigen.hpp"
-#include <thread>
+#include "math/multiply.hpp"
 #include <util/vector_utils.hpp>
 
 using namespace graphs;
@@ -193,8 +191,8 @@ void test_eigensolver_complex() {
 
   {
     GraphType fullGraph;
-    int       N = 150;
-    int       R = 4000;
+    int       N = 80;
+    int       R = 200;
     DETRA_TIMER(JacobiGeneration)
 
     fullGraph = generators::preferential_directed<GraphType, random_sources::XORand>(N * N, N * N * R);
@@ -207,8 +205,7 @@ void test_eigensolver_complex() {
 
   {
     DETRA_TIMER(Jacobi)
-
-    detra::math::row_normalize(matrix);
+    matrix.row_normalize();
     auto result = detra::math::jacobi(matrix);
   }
 }
