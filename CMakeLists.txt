@@ -15,20 +15,35 @@ if(OpenMP_CXX_FOUND)
     message(STATUS "OpenMP found: ${OpenMP_CXX_FLAGS}")
 endif()
 
-file(GLOB_RECURSE INCLUDE_SRC src/*.cpp)
+add_library(detragraphs INTERFACE)
 
+target_include_directories(detragraphs
+    INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<INSTALL_INTERFACE:include>
+)
+
+target_include_directories(detragraphs
+    INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/glm
+)
+
+# Existing external dependencies
 include_directories(lib/detrarandom)
 include_directories(lib/eigen)
 
 add_subdirectory(lib/detrarandom)
 add_subdirectory(lib/eigen)
 
+# Existing test executables (now link against the new target)
 add_executable(detragraphs_test tests/main.cpp)
 target_include_directories(detragraphs_test PRIVATE src)
-target_link_libraries(detragraphs_test PRIVATE OpenMP::OpenMP_CXX)
+# Link against the new detragraphs interface target
+target_link_libraries(detragraphs_test PRIVATE detragraphs OpenMP::OpenMP_CXX)
 target_compile_options(detragraphs_test PRIVATE ${OpenMP_CXX_FLAGS})
 
 add_executable(detragraphs_test_csr tests/main_csr.cpp)
 target_include_directories(detragraphs_test_csr PRIVATE src)
-target_link_libraries(detragraphs_test_csr PRIVATE OpenMP::OpenMP_CXX)
+# Link against the new detragraphs interface target
+target_link_libraries(detragraphs_test_csr PRIVATE detragraphs OpenMP::OpenMP_CXX)
 target_compile_options(detragraphs_test_csr PRIVATE ${OpenMP_CXX_FLAGS})
