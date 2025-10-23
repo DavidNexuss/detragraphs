@@ -57,10 +57,18 @@ struct FlatMatrix {
   ConstFlatMatrixProxy operator[](size_t i) const { return ConstFlatMatrixProxy(i, M, p_data); }
 
   size_t getColumnCount() const { return M; }
+  
   size_t getRowCount() const { return N; }
 
   inline T get(size_t i, size_t j) { return p_data[i * M + j]; }
 
+ /**
+  * Performs the following operation to vector output from vector input
+  * O = output;
+  * I = input;
+  * A = *this;
+  * Oj = Ii * sum j Aij
+  */
   void apply_inplace(const std::vector<float>& input, std::vector<float>& output) {
     std::fill(output.begin(), output.end(), 0.0);
     for (size_t i = 0; i < N; ++i)
@@ -68,9 +76,7 @@ struct FlatMatrix {
         output[j] += input[i] * p_data[i * M + j];
   }
 
-
-  const T*
-  data() const { return p_data.data(); }
+  const T* data() const { return p_data.data(); }
 
   void print() const {
     std::cout << N << "x" << M << " Matrix:\n";

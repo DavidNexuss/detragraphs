@@ -4,7 +4,6 @@
 #include <thread>
 #include <numeric>
 #include "algorithms.hpp"
-#include "graph.hpp"
 
 namespace graphs {
 namespace metrics {
