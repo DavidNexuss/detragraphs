@@ -117,7 +117,7 @@ void test_walk() {
   std::cout << deg_dfs_t << std::endl;
 
   std::cout << "BFS Tree Degree Sequence:\n";
-  std::cout << deg_bfs_t<< std::endl;
+  std::cout << deg_bfs_t << std::endl;
 }
 
 void test_prim() {
