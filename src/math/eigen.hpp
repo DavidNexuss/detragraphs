@@ -1,14 +1,12 @@
 #pragma once
-#include <Eigen/Dense> // Use Eigen/Dense instead of Eigen/Eigen
-#include <complex>
 #include <vector>
 #include "flatmatrix.hpp"
-#include "../util/vector_utils.hpp"
 #include "../stats.hpp"
 
 namespace detra {
 namespace math {
 
+/*  
 inline std::vector<std::complex<float>> eigenvalues(const FlatMatrix<float>& matrix) {
   const size_t N = matrix.getRowCount();
   const size_t M = matrix.getColumnCount();
@@ -38,8 +36,7 @@ inline std::vector<std::complex<float>> eigenvalues(const FlatMatrix<float>& mat
 
   return result;
 }
-
-
+*/
 
 inline void row_normalize(FlatMatrix<float>& matrix) {
   int   N              = matrix.getRowCount();
