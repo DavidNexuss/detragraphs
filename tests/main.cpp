@@ -47,8 +47,6 @@ void benchmark() {
 
     std::cout << "Full connectivity check counted " << connected_count << " connections.\n";
   }
-
-  math::spectral_radius(parser::convert_matrix(graph));
 }
 
 void test_prefferential() {
@@ -216,7 +214,6 @@ void test_eigensolver_complex() {
 }
 
 int main() {
-  Eigen::setNbThreads(std::thread::hardware_concurrency());
   test_eigensolver_complex();
   return 0;
 }
