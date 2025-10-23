@@ -62,20 +62,31 @@ struct FlatMatrix {
   size_t getRowCount() const { return N; }
 
   inline T& get(size_t i, size_t j) { return p_data[i * M + j]; }
+  inline const T& get(size_t i, size_t j) const { return p_data[i * M + j]; }
 
   /**
-  * Performs the following operation to vector output from vector input
-  * O = output;
-  * I = input;
-  * A = *this;
-  * Oj = Ii * sum j Aij
-  */
+   * Performs the standard matrix-vector multiplication: 
+   * O = A * I
+   * O_i = sum_j (A_ij * I_j)
+   */
   void apply_inplace(const std::vector<float>& input, std::vector<float>& output) {
-    std::fill(output.begin(), output.end(), 0.0);
-    for (size_t i = 0; i < N; ++i)
-      for (size_t j = 0; j < N; ++j)
-        output[j] += input[i] * p_data[i * M + j];
-  }
+      if (output.size() != N) {
+           output.resize(N, 0.0f);
+      } else {
+           std::fill(output.begin(), output.end(), 0.0f);
+      }
+
+      if (input.size() != M) {
+           std::cerr << "Error: Input vector size does not match matrix column count (M)." << std::endl;
+           return;
+      }
+
+      for (size_t i = 0; i < N; ++i) { 
+          for (size_t j = 0; j < M; ++j) { 
+              output[i] += p_data[i * M + j] * input[j];
+          }
+      }
+      }
 
   const T* data() const { return p_data.data(); }
 

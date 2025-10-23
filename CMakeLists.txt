@@ -15,7 +15,6 @@ if(OpenMP_CXX_FOUND)
     message(STATUS "OpenMP found: ${OpenMP_CXX_FLAGS}")
 endif()
 
-file(GLOB_RECURSE SRC tests/*.cpp)
 file(GLOB_RECURSE INCLUDE_SRC src/*.cpp)
 
 include_directories(lib/detrarandom)
@@ -24,10 +23,12 @@ include_directories(lib/eigen)
 add_subdirectory(lib/detrarandom)
 add_subdirectory(lib/eigen)
 
-add_executable(detragraphs_test ${SRC})
+add_executable(detragraphs_test tests/main.cpp)
 target_include_directories(detragraphs_test PRIVATE src)
-
 target_link_libraries(detragraphs_test PRIVATE OpenMP::OpenMP_CXX)
-
 target_compile_options(detragraphs_test PRIVATE ${OpenMP_CXX_FLAGS})
 
+add_executable(detragraphs_test_csr tests/main_csr.cpp)
+target_include_directories(detragraphs_test_csr PRIVATE src)
+target_link_libraries(detragraphs_test_csr PRIVATE OpenMP::OpenMP_CXX)
+target_compile_options(detragraphs_test_csr PRIVATE ${OpenMP_CXX_FLAGS})

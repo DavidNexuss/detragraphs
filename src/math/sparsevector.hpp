@@ -13,16 +13,14 @@ struct SparseVector {
   SparseVector() {}
   SparseVector(int _M) :
     M(_M) {}
-};
 
-SparseVector toSparseVector(const std::vector<float>& x, float tol = 1e-6f) {
-  SparseVector sx;
-  sx.M = static_cast<int>(x.size());
-  for (int i = 0; i < sx.M; ++i)
-    if (std::fabs(x[i]) > tol)
-      sx.data.emplace_back(i, x[i]);
-  return sx;
-}
+  SparseVector(const std::vector<float>& x, float tol = 1e-6f) {
+    M = static_cast<int>(x.size());
+    
+    for (int i = 0; i < M; ++i)
+      if (std::fabs(x[i]) > tol) data.emplace_back(i, x[i]);
+  }
+};
 
 } // namespace math
 } // namespace detra

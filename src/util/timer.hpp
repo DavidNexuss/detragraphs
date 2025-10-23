@@ -22,5 +22,4 @@ struct Timer {
 } // namespace util
 } // namespace detra
 
-
 #define DETRA_TIMER(X) detra::util::Timer X(#X);

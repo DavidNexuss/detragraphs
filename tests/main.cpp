@@ -1,5 +1,4 @@
 #include "generators.hpp"
-#include "graphbackend/graphbackend.hpp"
 #include "metrics.hpp"
 #include "graph.hpp"
 #include "parser.hpp"
@@ -8,6 +7,8 @@
 #include "util/timer.hpp"
 #include "math/multiply.hpp"
 #include <util/vector_utils.hpp>
+#include <graphbackend/adjacencylist.hpp>
+#include <graphbackend/adjacencymatrix.hpp>
 
 using namespace graphs;
 using namespace detra;
