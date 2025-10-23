@@ -135,11 +135,11 @@ GraphO walk_dfs_tree(const GraphT& graph, uint64_t source) {
 /**
  *  Converts a graph to an edge list
  */
-template  <typename  GraphT>
+template <typename GraphT>
 std::vector<std::pair<uint64_t, uint64_t>> to_edge_list(GraphT& graph) {
   std::vector<std::pair<uint64_t, uint64_t>> edgelist;
   for (size_t i = 0; i < graph.getVertexCount(); i++) {
-    for(uint64_t u : graph.getEdges(i)) edgelist.push_back({i, u});
+    for (uint64_t u : graph.getEdges(i)) edgelist.push_back({i, u});
   }
   return edgelist;
 }
@@ -270,7 +270,7 @@ GraphO sample_graph(const GraphT& graph, uint64_t N) {
   if (N > M)
     throw std::invalid_argument("Sample size N cannot exceed vertex count.");
 
-  std::vector<uint64_t> selected = random_sample(N, M);
+  std::vector<uint64_t>                  selected = random_sample(N, M);
   std::unordered_map<uint64_t, uint64_t> index_map;
 
   for (uint64_t i = 0; i < N; ++i)

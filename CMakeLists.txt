@@ -20,6 +20,7 @@ file(GLOB_RECURSE INCLUDE_SRC
 )
 
 include_directories(lib/detrarandom)
+include_directories(lib/eigen)
 
 add_subdirectory(lib/detrarandom)
 add_subdirectory(lib/eigen)

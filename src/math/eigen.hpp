@@ -1,6 +1,7 @@
 #pragma once
-#include <eigen3/Eigen/Eigen>
-#include <eigen3/Eigen/Eigenvalues>
+#include <Eigen/Dense> // Use Eigen/Dense instead of Eigen/Eigen
+#include <complex>
+#include <vector>
 #include "flatmatrix.hpp"
 #include "../util/vector_utils.hpp"
 #include "../stats.hpp"
@@ -9,8 +10,8 @@ namespace detra {
 namespace math {
 
 inline std::vector<std::complex<float>> eigenvalues(const FlatMatrix<float>& matrix) {
-  size_t N = matrix.getRowCount();
-  size_t M = matrix.getColumnCount();
+  const size_t N = matrix.getRowCount();
+  const size_t M = matrix.getColumnCount();
 
   if (N != M) {
     return {};
@@ -20,43 +21,25 @@ inline std::vector<std::complex<float>> eigenvalues(const FlatMatrix<float>& mat
 
   Eigen::Map<const MatrixType> eigen_matrix(matrix.data(), N, M);
 
-  Eigen::EigenSolver<MatrixType> solver(eigen_matrix);
+  Eigen::EigenSolver<MatrixType> solver(eigen_matrix, false);
 
   if (solver.info() != Eigen::Success) {
     return {};
   }
 
-  const Eigen::VectorXcf& eigen_values_eigen = solver.eigenvalues();
+  const auto& eigen_values = solver.eigenvalues();
 
-  std::vector<std::complex<float>> result_eigenvalues;
-  result_eigenvalues.reserve(eigen_values_eigen.size());
+  std::vector<std::complex<float>> result;
+  result.reserve(eigen_values.size());
 
-  for (int i = 0; i < eigen_values_eigen.size(); ++i) {
-    result_eigenvalues.push_back(eigen_values_eigen(i));
+  for (Eigen::Index i = 0; i < eigen_values.size(); ++i) {
+    result.emplace_back(eigen_values[i]);
   }
 
-  return result_eigenvalues;
+  return result;
 }
 
-inline float spectral_radius(const FlatMatrix<float>& matrix) {
-  std::vector<std::complex<float>> evals = eigenvalues(matrix);
 
-  if (evals.empty()) {
-    return 0.0f;
-  }
-
-  float max_modulus = 0.0f;
-
-  for (const auto& lambda : evals) {
-    float modulus = std::abs(lambda);
-
-    if (modulus > max_modulus) {
-      max_modulus = modulus;
-    }
-  }
-
-  return max_modulus;
-}
 
 inline void row_normalize(FlatMatrix<float>& matrix) {
   int   N              = matrix.getRowCount();

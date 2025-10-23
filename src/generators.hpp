@@ -1,3 +1,4 @@
+#pragma once
 #include <cstdint>
 #include <unordered_set>
 #include <detrarandom/random_sources.hpp>
@@ -163,35 +164,35 @@ GraphT watts_strogatz(uint64_t n, uint64_t k, double beta, RandomSource randomSo
 template <typename GraphT, typename RandomSource>
 GraphT preferential_directed(uint64_t n, uint64_t e, RandomSource randomSource = RandomSource{}) {
   GraphT g;
-  g.addVertices(n); 
+  g.addVertices(n);
 
   std::vector<uint64_t> preferentialNodes;
-  preferentialNodes.reserve(2 * e); 
+  preferentialNodes.reserve(2 * e);
 
 
   for (uint64_t i = 0; i < n; ++i) {
-    preferentialNodes.push_back(i); 
+    preferentialNodes.push_back(i);
   }
 
-  std::vector<uint64_t> inDegrees(n, 1); 
+  std::vector<uint64_t> inDegrees(n, 1);
 
   for (uint64_t i = 0; i < e; ++i) {
-    uint64_t u = i % n; 
+    uint64_t u = i % n;
     uint64_t v = u;
 
-    size_t max_attempts = 10; 
+    size_t max_attempts = 10;
     while (u == v || g.isConnected(v, u)) {
       v = preferentialNodes[randomSource.randi() % preferentialNodes.size()];
       if (--max_attempts == 0) {
-        v = n; 
+        v = n;
         break;
       }
     }
 
     if (v < n && u != v) {
-      g.addEdge(v, u); 
-      preferentialNodes.push_back(v); 
-      inDegrees[v]++; 
+      g.addEdge(v, u);
+      preferentialNodes.push_back(v);
+      inDegrees[v]++;
     }
   }
 

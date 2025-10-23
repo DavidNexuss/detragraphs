@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include <cstdint>
-#include <queue>
 #include <thread>
 #include <numeric>
 #include "algorithms.hpp"
@@ -119,10 +118,10 @@ float closeness_centrality(const GraphT& graph, uint64_t source) {
  * @return A 2D vector of floats representing the distance matrix, where `dist[i][j]` is the shortest path distance.
  */
 template <typename GraphT>
-std::vector<std::vector<float>> distance_matrix(GraphT& graph) { 
-  uint64_t n = graph.getVertexCount(); 
+std::vector<std::vector<float>> distance_matrix(GraphT& graph) {
+  uint64_t n = graph.getVertexCount();
 
-  const float INF = std::numeric_limits<float>::infinity();
+  const float                     INF = std::numeric_limits<float>::infinity();
   std::vector<std::vector<float>> dist(n, std::vector<float>(n, INF));
 
   for (uint64_t i = 0; i < n; ++i) {
@@ -131,15 +130,15 @@ std::vector<std::vector<float>> distance_matrix(GraphT& graph) {
 
   for (uint64_t u = 0; u < n; ++u) {
     for (uint64_t v = 0; v < n; ++v) {
-      if (graph.isConnected(u, v)) { 
-        dist[u][v] = graph.getEdgeWeight(u, v); 
+      if (graph.isConnected(u, v)) {
+        dist[u][v] = graph.getEdgeWeight(u, v);
       }
     }
   }
 
   for (uint64_t k = 0; k < n; ++k) {
     for (uint64_t i = 0; i < n; ++i) {
-      for (uint64_t j = 0; j < n; ++j) { 
+      for (uint64_t j = 0; j < n; ++j) {
         if (dist[i][k] != INF && dist[k][j] != INF) {
           dist[i][j] = std::min(dist[i][j], dist[i][k] + dist[k][j]);
         }
@@ -148,7 +147,6 @@ std::vector<std::vector<float>> distance_matrix(GraphT& graph) {
   }
 
   return dist;
-
 }
 
 /**
