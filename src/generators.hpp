@@ -25,7 +25,7 @@ namespace generators {
  * @param n N vertices
  * @param p probabiliy that two vertices are connected
  **/
-template <typename GraphT, typename RandomSource, bool directed = false>
+template <typename GraphT, typename RandomSource = random_sources::Standard, bool directed = false>
 GraphT erdos_renyi(uint64_t n, double p, RandomSource randomSource = RandomSource{}) {
   GraphT g;
 
@@ -49,7 +49,7 @@ GraphT erdos_renyi(uint64_t n, double p, RandomSource randomSource = RandomSourc
  * @param randomSource The random source (by default constructed specified in templated)
  * @returns The graph within the switch model generator
  **/
-template <typename GraphInput, typename GraphOutput, typename RandomSource>
+template <typename GraphInput, typename GraphOutput, typename RandomSource = random_sources::Standard>
 GraphOutput switch_model(const GraphInput& input, int switches, RandomSource randomSource = RandomSource{}) {
   std::vector<std::pair<uint32_t, uint32_t>> edgelist = algorithms::to_edge_list(input);
 
@@ -89,7 +89,7 @@ GraphOutput switch_model(const GraphInput& input, int switches, RandomSource ran
 /**
  * Generate a Barabasi Albert graph with n vertices 
  **/
-template <typename GraphT, typename RandomSource, bool directed = false>
+template <typename GraphT, typename RandomSource = random_sources::Standard, bool directed = false>
 GraphT barabasi_albert(uint64_t n, uint64_t m0, uint64_t m, RandomSource randomSource = RandomSource{}) {
   if (m > m0 || m0 >= n) throw std::invalid_argument("Invalid parameters for BA model");
 
@@ -126,7 +126,7 @@ GraphT barabasi_albert(uint64_t n, uint64_t m0, uint64_t m, RandomSource randomS
   return g;
 }
 
-template <typename GraphT, typename RandomSource, bool directed = false>
+template <typename GraphT, typename RandomSource = random_sources::Standard, bool directed = false>
 GraphT watts_strogatz(uint64_t n, uint64_t k, double beta, RandomSource randomSource = RandomSource{}) {
   if (k >= n) throw std::invalid_argument("k must be < n");
 
@@ -161,7 +161,7 @@ GraphT watts_strogatz(uint64_t n, uint64_t k, double beta, RandomSource randomSo
  * @param randomSource The randomSource used
  * @returns The graph
  **/
-template <typename GraphT, typename RandomSource>
+template <typename GraphT, typename RandomSource = random_sources::Standard>
 GraphT preferential_directed(uint64_t n, uint64_t e, RandomSource randomSource = RandomSource{}) {
   GraphT g;
   g.addVertices(n);
@@ -206,7 +206,7 @@ GraphT preferential_directed(uint64_t n, uint64_t e, RandomSource randomSource =
  * @param p The probability to spawn a node in a given levle
  * @returns The graph
  */
-template <typename GraphT, typename RandomSource>
+template <typename GraphT, typename RandomSource = random_sources::Standard>
 GraphT recursive_tree(uint64_t levels, uint64_t maxlevelcount, float p, RandomSource randomSource = RandomSource{}) {
   GraphT g;
   if (levels == 0) return g;
