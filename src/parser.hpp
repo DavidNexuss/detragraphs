@@ -14,7 +14,7 @@ using GraphJsonRepresentation = std::map<uint64_t, std::vector<uint64_t>>;
 
 template <typename Representation>
 Representation representationFromJson(const std::string& data) {
-  return (nlohmann::json(data)).get<GraphJsonRepresentation>();
+  return nlohmann::json::parse(data).get<Representation>();
 }
 
 template <typename Representation>

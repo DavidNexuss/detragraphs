@@ -3,6 +3,7 @@
 #include <vector>
 
 namespace detra {
+namespace io {
 std::string read(const std::string& filename, std::shared_ptr<IOAdapter> io) {
   int fd = io->open(filename);
 
@@ -30,7 +31,7 @@ int write(const std::string& filename, const std::string& content, std::shared_p
   return 0;
 }
 
-std::map<std::string, std::string> readdir(const std::string& directory, std::shared_ptr<IOAdapter> io = unisIO()) {
+std::map<std::string, std::string> readdir(const std::string& directory, std::shared_ptr<IOAdapter> io) {
   std::map<std::string, std::string> result;
 
   std::vector<std::string> files = io->listdir(directory);
@@ -46,4 +47,5 @@ std::map<std::string, std::string> readdir(const std::string& directory, std::sh
 
   return result;
 }
+} // namespace io
 } // namespace detra

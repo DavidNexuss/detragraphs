@@ -102,7 +102,7 @@ struct IOAdapterUnis : public IOAdapter {
 };
 
 
-std::shared_ptr<IOAdapter> unisIO() { return std::make_shared<IOAdapterUnis>(); }
+inline std::shared_ptr<IOAdapter> unisIO() { return std::make_shared<IOAdapterUnis>(); }
 
 namespace io {
 std::string                        read(const std::string& filename, std::shared_ptr<IOAdapter> io = unisIO());
