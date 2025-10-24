@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "ioadapter.hpp"
+#include <vector>
 
 namespace detra {
 std::string read(const std::string& filename, std::shared_ptr<IOAdapter> io) {
@@ -27,5 +28,22 @@ int write(const std::string& filename, const std::string& content, std::shared_p
   io->close(fd);
 
   return 0;
+}
+
+std::map<std::string, std::string> readdir(const std::string& directory, std::shared_ptr<IOAdapter> io = unisIO()) {
+  std::map<std::string, std::string> result;
+
+  std::vector<std::string> files = io->listdir(directory);
+
+  for (const auto& file : files) {
+    std::string path = directory;
+    if (!path.empty() && path.back() != '/') path += '/';
+    path += file;
+
+    std::string content = io::read(path, io);
+    result[file]        = content;
+  }
+
+  return result;
 }
 } // namespace detra
