@@ -69,7 +69,7 @@ struct FlatMatrix {
    * O = A * I
    * O_i = sum_j (A_ij * I_j)
    */
-  void apply_inplace(const std::vector<float>& input, std::vector<float>& output) {
+  void apply_inplace(const std::vector<float>& input, std::vector<float>& output) const {
     if (output.size() != N) {
       output.resize(N, 0.0f);
     } else {
@@ -107,6 +107,14 @@ struct FlatMatrix {
         for (size_t j = 0; j < M; j++) {
           get(i, j) = damping_factor * (get(i, j) / total) + (1.0f - damping_factor) / N;
         }
+      }
+    }
+  }
+
+  void transpose() {
+    for (size_t i = 0; i < N; i++) {
+      for (size_t j = i + 1; j < N; j++) {
+        std::swap(get(i, j), get(j, i));
       }
     }
   }

@@ -42,3 +42,8 @@ add_executable(detragraphs_test_csr tests/main_csr.cpp)
 target_include_directories(detragraphs_test_csr PRIVATE src)
 target_link_libraries(detragraphs_test_csr PRIVATE detragraphs OpenMP::OpenMP_CXX)
 target_compile_options(detragraphs_test_csr PRIVATE ${OpenMP_CXX_FLAGS})
+
+add_executable(detragraphs_test_jacobi tests/main_jacobi.cpp)
+target_include_directories(detragraphs_test_jacobi PRIVATE src)
+target_link_libraries(detragraphs_test_jacobi PRIVATE detragraphs OpenMP::OpenMP_CXX)
+target_compile_options(detragraphs_test_jacobi PRIVATE ${OpenMP_CXX_FLAGS})
