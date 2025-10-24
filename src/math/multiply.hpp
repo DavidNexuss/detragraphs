@@ -5,37 +5,70 @@
 namespace detra {
 namespace math {
 
+/* 
+* Computes the power method for finding the stationary vector of a column stochastic Markov chain.
+* This method does not check if the matrix spectral radius is less than 1.0!
+* @param matrix The Markov chain in column stochastic (each column must sum 1.0 or less)
+* @returns The stationary vector
+* */
 template <typename Matrix>
-inline typename Matrix::Vector jacobi(const Matrix& matrix) {
+inline typename Matrix::Vector jacobi(const Matrix& matrix, float epsilon = 1e-7f, int maxiterations = 1000, typename Matrix::Vector current = {}) {
   using Vector = typename Matrix::Vector;
 
-  if (matrix.N != matrix.M) return {};
+  if (matrix.N == 0) return {};
+  if (matrix.M == 0) return {};
 
-  Vector result[2] = {
-    Vector(matrix.N),
-    Vector(matrix.N),
-  };
-
-  for (size_t i = 0; i < matrix.N; i++) {
-    result[0][i] = 1.0f / float(matrix.N);
-    result[1][i] = 0.0f;
+  if (current.size() == 0) {
+    current = typename Matrix::Vector(matrix.N, 1.0f / (float)matrix.N);
   }
 
-  float difference    = 0.0f;
-  int   maxiterations = 1000;
-  int   iteration     = 0;
+  Vector next = current;
+
+  float difference = 0.0f;
+  int   iteration  = 0;
 
   do {
-    matrix.apply_inplace(result[0], result[1]);
-    difference = graphs::stats::square_difference(result[0], result[1]);
-    std::swap(result[0], result[1]);
+    matrix.apply_inplace(current, next);
+    difference = graphs::stats::square_difference(current, next);
+    std::swap(current, next);
     iteration++;
-  } while (difference > 1e-7f && iteration < maxiterations);
+  } while (difference > epsilon && iteration < maxiterations);
 
-  std::cerr << "Iterations: " << iteration << std::endl;
-  std::cerr << "Delta: " << difference << std::endl;
+  std::cerr << "[Jacobi] Iterations: " << iteration
+            << "  Delta: " << difference << std::endl;
 
-  return result[0];
+  return current;
+}
+
+/* 
+* */
+template <typename Matrix>
+inline typename Matrix::Vector gauss(const Matrix& matrix, float epsilon = 1e-7f, int maxiterations = 1000, typename Matrix::Vector current = {}) {
+  using Vector = typename Matrix::Vector;
+
+  if (matrix.N == 0) return {};
+  if (matrix.M == 0) return {};
+
+  if (current.size() == 0) {
+    current = typename Matrix::Vector(matrix.N, 1.0f / (float)matrix.N);
+  }
+
+  Vector next = current;
+
+  float difference = 0.0f;
+  int   iteration  = 0;
+
+  do {
+    matrix.apply_inplace(next);
+    difference = graphs::stats::square_difference(current, next);
+    current    = next;
+    iteration++;
+  } while (difference > epsilon && iteration < maxiterations);
+
+  std::cerr << "[Jacobi] Iterations: " << iteration
+            << "  Delta: " << difference << std::endl;
+
+  return current;
 }
 
 
