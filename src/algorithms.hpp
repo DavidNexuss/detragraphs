@@ -9,7 +9,6 @@
 #include <random>
 #include <algorithm>
 #include <stdexcept>
-#include <omp.h>
 #include <assert.h>
 
 namespace graphs {
