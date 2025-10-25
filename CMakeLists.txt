@@ -9,10 +9,20 @@ set(CMAKE_COMPILE_WARNING_AS_ERROR OFF)
 set(CMAKE_CXX_FLAGS_DEBUG "-fsanitize=address -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ftree-vectorize -march=native")
 
-find_package(OpenMP REQUIRED)
-
-if(OpenMP_CXX_FOUND)
-    message(STATUS "OpenMP found: ${OpenMP_CXX_FLAGS}")
+# --------------------------
+# OpenMP Configuration
+# --------------------------
+# Only attempt to find and use OpenMP if NOT on macOS (APPLE).
+if(NOT APPLE)
+    find_package(OpenMP) # No longer REQUIRED
+    if(OpenMP_CXX_FOUND)
+        message(STATUS "OpenMP found: ${OpenMP_CXX_FLAGS}")
+        set(USE_OPENMP TRUE)
+    else()
+        message(STATUS "OpenMP not found. Building without OpenMP support.")
+    endif()
+else()
+    message(STATUS "Skipping OpenMP on macOS.")
 endif()
 
 # --------------------------
@@ -21,8 +31,11 @@ endif()
 file(GLOB_RECURSE DETRAGRAPHS_SOURCES src/*.cpp)
 add_library(detragraphs ${DETRAGRAPHS_SOURCES})
 target_include_directories(detragraphs PUBLIC src)
-target_link_libraries(detragraphs PUBLIC OpenMP::OpenMP_CXX)
-target_compile_options(detragraphs PRIVATE ${OpenMP_CXX_FLAGS})
+
+if(USE_OPENMP)
+    target_link_libraries(detragraphs PUBLIC OpenMP::OpenMP_CXX)
+    target_compile_options(detragraphs PRIVATE ${OpenMP_CXX_FLAGS})
+endif()
 
 # --------------------------
 # External dependencies
@@ -35,15 +48,24 @@ add_subdirectory(lib/detrarandom)
 # --------------------------
 add_executable(detragraphs_test tests/main.cpp)
 target_include_directories(detragraphs_test PRIVATE src)
-target_link_libraries(detragraphs_test PRIVATE detragraphs OpenMP::OpenMP_CXX)
-target_compile_options(detragraphs_test PRIVATE ${OpenMP_CXX_FLAGS})
+target_link_libraries(detragraphs_test PRIVATE detragraphs detrarandom) # Link detrarandom here
+if(USE_OPENMP)
+    target_link_libraries(detragraphs_test PRIVATE OpenMP::OpenMP_CXX)
+    target_compile_options(detragraphs_test PRIVATE ${OpenMP_CXX_FLAGS})
+endif()
 
 add_executable(detragraphs_test_csr tests/main_csr.cpp)
 target_include_directories(detragraphs_test_csr PRIVATE src)
-target_link_libraries(detragraphs_test_csr PRIVATE detragraphs OpenMP::OpenMP_CXX)
-target_compile_options(detragraphs_test_csr PRIVATE ${OpenMP_CXX_FLAGS})
+target_link_libraries(detragraphs_test_csr PRIVATE detragraphs detrarandom)
+if(USE_OPENMP)
+    target_link_libraries(detragraphs_test_csr PRIVATE OpenMP::OpenMP_CXX)
+    target_compile_options(detragraphs_test_csr PRIVATE ${OpenMP_CXX_FLAGS})
+endif()
 
 add_executable(detragraphs_test_jacobi tests/main_jacobi.cpp)
 target_include_directories(detragraphs_test_jacobi PRIVATE src)
-target_link_libraries(detragraphs_test_jacobi PRIVATE detragraphs OpenMP::OpenMP_CXX)
-target_compile_options(detragraphs_test_jacobi PRIVATE ${OpenMP_CXX_FLAGS})
+target_link_libraries(detragraphs_test_jacobi PRIVATE detragraphs detrarandom)
+if(USE_OPENMP)
+    target_link_libraries(detragraphs_test_jacobi PRIVATE OpenMP::OpenMP_CXX)
+    target_compile_options(detragraphs_test_jacobi PRIVATE ${OpenMP_CXX_FLAGS})
+endif()
