@@ -31,6 +31,7 @@ endif()
 file(GLOB_RECURSE DETRAGRAPHS_SOURCES src/*.cpp)
 add_library(detragraphs ${DETRAGRAPHS_SOURCES})
 target_include_directories(detragraphs PUBLIC src)
+target_include_directories(detragraphs PUBLIC lib/json/include)
 
 if(USE_OPENMP)
     target_link_libraries(detragraphs PUBLIC OpenMP::OpenMP_CXX)
