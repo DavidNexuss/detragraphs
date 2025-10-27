@@ -112,7 +112,7 @@ float closeness_centrality(const GraphT& graph, uint64_t source) {
  * @brief Computes the shortest path distance matrix 
  * for a weighted, directed graph using the Floyd-Warshall algorithm.
  *
- * @tparam GraphT The graph type.
+ * @param GraphT The graph type.
  * @param[in] graph The input graph (passed by reference) for which the distance matrix is computed.
  * @return A 2D vector of floats representing the distance matrix, where `dist[i][j]` is the shortest path distance.
  */
