@@ -51,11 +51,11 @@ GraphT erdos_renyi(uint64_t n, double p, RandomSource randomSource = RandomSourc
  **/
 template <typename GraphInput, typename GraphOutput, typename RandomSource = random_sources::Standard>
 GraphOutput switch_model(const GraphInput& input, int switches, RandomSource randomSource = RandomSource{}) {
-  std::vector<std::pair<uint32_t, uint32_t>> edgelist = algorithms::to_edge_list(input);
+  std::vector<std::pair<uint64_t, uint64_t>> edgelist = algorithms::to_edge_list(input);
 
   for (size_t i = 0; i < switches; i++) {
-    std::pair<uint32_t, uint32_t> edgeSource;
-    std::pair<uint32_t, uint32_t> edgeTarget;
+    std::pair<uint64_t, uint64_t> edgeSource;
+    std::pair<uint64_t, uint64_t> edgeTarget;
 
     uint32_t edgeSourceIndex;
     uint32_t edgeTargetIndex;

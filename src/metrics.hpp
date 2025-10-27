@@ -97,7 +97,7 @@ double average_clustering_coefficient(const GraphT& graph) {
  */
 template <typename GraphT>
 float closeness_centrality(const GraphT& graph, uint64_t source) {
-  std::vector<algorithms::WalkResult> distances = walk_bfs(graph, source);
+  std::vector<algorithms::WalkResult> distances = graphs::algorithms::walk_bfs(graph, source);
 
   double average_distance = 0.0;
 
