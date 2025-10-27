@@ -9,7 +9,6 @@
 #include <random>
 #include <algorithm>
 #include <stdexcept>
-#include <omp.h>
 #include <assert.h>
 
 namespace graphs {
@@ -57,6 +56,7 @@ std::vector<WalkResult> walk_bfs(const GraphT& graph, uint64_t source) {
 
   int depth = 0;
   while (!toVisit.empty()) {
+    depth++;
     std::vector<uint64_t> nextToVisit;
 
     for (uint64_t u : toVisit) {
@@ -68,9 +68,7 @@ std::vector<WalkResult> walk_bfs(const GraphT& graph, uint64_t source) {
         }
       }
     }
-
     std::swap(nextToVisit, toVisit);
-    depth++;
   }
   return result;
 }

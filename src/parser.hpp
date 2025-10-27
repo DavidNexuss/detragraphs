@@ -12,16 +12,28 @@ namespace parser {
 using GraphJsonRepresentation = std::map<uint64_t, std::vector<uint64_t>>;
 
 
+template <typename Representation>
+Representation representationFromJson(const std::string& data) {
+  return nlohmann::json::parse(data).get<Representation>();
+}
+
+template <typename Representation>
+std::string representationToJson(const Representation& data) {
+  nlohmann::json j = data;
+  return j.dump();
+}
+
+
 /**
  * Returns a graph from a JsonRepresentation coded in a std::string.
  * @param data The json representation of the graph, check documentation to see some examples.
  * @returns the Graph
  */
-template <typename GraphT>
+template <typename GraphT, typename GraphRepresentation = GraphJsonRepresentation>
 GraphT fromjson(const std::string& data) {
   GraphT result;
 
-  GraphJsonRepresentation representation = (nlohmann::json(data)).get<GraphJsonRepresentation>();
+  GraphRepresentation representation = (nlohmann::json(data)).get<GraphJsonRepresentation>();
 
   uint64_t maximumVertex = 0;
   for (auto& val : representation) maximumVertex = std::max(val.first, maximumVertex);
@@ -40,9 +52,9 @@ GraphT fromjson(const std::string& data) {
  * @param graph The graph.
  * @returns The string with the encoded json of the graph.
  */
-template <typename GraphT>
+template <typename GraphT, typename GraphRepresentation = GraphJsonRepresentation>
 std::string tojson(const GraphT& graph) {
-  GraphJsonRepresentation representation;
+  GraphRepresentation representation;
 
   for (uint64_t i = 0; i < graph.getVertexCount(); i++) {
     std::vector<uint64_t> edges = graph.getEdges(i);

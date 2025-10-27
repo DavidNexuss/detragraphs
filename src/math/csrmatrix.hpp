@@ -36,7 +36,7 @@ struct CSRMatrix {
     }
   }
 
-  inline void apply_inplace(const std::vector<float>& x, std::vector<float>& y) {
+  inline void apply_inplace(const std::vector<float>& x, std::vector<float>& y) const {
     if (x.size() != M || y.size() != N) {
       y.resize(N, 0.0f);
     } else {

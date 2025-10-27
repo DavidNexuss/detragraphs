@@ -4,18 +4,26 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <map>
+#include <vector>
+#include <dirent.h>
+#include <string>
+#include <vector>
+#include <cerrno>
+#include <iostream>
 
 namespace detra {
 /* 
 * @brief Interface for reading and writing, based on Unis systems file IO APis
 * */
 struct IOAdapter {
-  virtual int      open(const std::string& filename)                = 0;
-  virtual uint64_t filesize(int fd)                                 = 0;
-  virtual ssize_t  read(int fd, void* buffer, size_t length)        = 0;
-  virtual ssize_t  write(int fd, const void* buffer, size_t length) = 0;
-  virtual int      flush(int fd)                                    = 0;
-  virtual int      close(int fd)                                    = 0;
+  virtual int                      open(const std::string& filename)                = 0;
+  virtual std::vector<std::string> listdir(const std::string& filepath)             = 0;
+  virtual uint64_t                 filesize(int fd)                                 = 0;
+  virtual ssize_t                  read(int fd, void* buffer, size_t length)        = 0;
+  virtual ssize_t                  write(int fd, const void* buffer, size_t length) = 0;
+  virtual int                      flush(int fd)                                    = 0;
+  virtual int                      close(int fd)                                    = 0;
   virtual ~IOAdapter() {}
 };
 
@@ -30,6 +38,28 @@ struct IOAdapterUnis : public IOAdapter {
     struct stat st{};
     if (::fstat(fd, &st) != 0) return 0;
     return static_cast<uint64_t>(st.st_size);
+  }
+
+  inline std::vector<std::string> listdir(const std::string& path) override {
+    std::vector<std::string> result;
+    DIR*                     dir = opendir(path.c_str());
+    if (!dir) {
+      std::cerr << "Failed to open directory: " << path << " errno=" << errno << std::endl;
+      return result;
+    }
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != nullptr) {
+      std::string name = entry->d_name;
+
+      // Skip "." and ".."
+      if (name == "." || name == "..") continue;
+
+      result.push_back(name);
+    }
+
+    closedir(dir);
+    return result;
   }
 
   inline ssize_t read(int fd, void* buffer, size_t length) override {
@@ -72,10 +102,11 @@ struct IOAdapterUnis : public IOAdapter {
 };
 
 
-std::shared_ptr<IOAdapter> unisIO() { return std::make_shared<IOAdapterUnis>(); }
+inline std::shared_ptr<IOAdapter> unisIO() { return std::make_shared<IOAdapterUnis>(); }
 
 namespace io {
-std::string read(const std::string& filename, std::shared_ptr<IOAdapter> io = unisIO());
-int         write(const std::string& filename, const std::string& content, std::shared_ptr<IOAdapter> io = unisIO());
+std::string                        read(const std::string& filename, std::shared_ptr<IOAdapter> io = unisIO());
+std::map<std::string, std::string> readdir(const std::string& filename, std::shared_ptr<IOAdapter> io = unisIO());
+int                                write(const std::string& filename, const std::string& content, std::shared_ptr<IOAdapter> io = unisIO());
 } // namespace io
 } // namespace detra
