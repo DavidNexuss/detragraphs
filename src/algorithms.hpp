@@ -44,15 +44,16 @@ std::vector<WalkResult> walk_dfs(const GraphT& graph, uint64_t source) {
 
 template <typename GraphT>
 std::vector<WalkResult> walk_bfs(const GraphT& graph, uint64_t source) {
-  int N = graph.getVertexCount();
+  size_t N = graph.getVertexCount();
 
-  std::vector<char>       vertex_visited(N);
+  std::vector<char>       vertex_visited(N, 0);
   std::vector<WalkResult> result;
 
   std::vector<uint64_t> toVisit;
 
-  toVisit.push_back(source);
+  result.push_back({source, 0});
   vertex_visited[source] = 1;
+  toVisit.push_back(source);
 
   int depth = 0;
   while (!toVisit.empty()) {
@@ -68,6 +69,8 @@ std::vector<WalkResult> walk_bfs(const GraphT& graph, uint64_t source) {
         }
       }
     }
+
+    toVisit.clear();
     std::swap(nextToVisit, toVisit);
   }
   return result;

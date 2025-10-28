@@ -90,24 +90,6 @@ double average_clustering_coefficient(const GraphT& graph) {
 }
 
 /**
- * Returns the closeness centrality, that is, the average of distances between a vertex and the other vertices of the network
- * Assumes the graph only has a one connected component
- * Uses the BFS algorithm
- * @returns The closeness
- */
-template <typename GraphT>
-float closeness_centrality(const GraphT& graph, uint64_t source) {
-  std::vector<algorithms::WalkResult> distances = graphs::algorithms::walk_bfs(graph, source);
-
-  double average_distance = 0.0;
-
-  for (size_t i = 0; i < distances.size(); i++)
-    average_distance += distances[i].distanceFromSource;
-
-  return average_distance / (graph.getVertexCount() - 1);
-}
-
-/**
  * @brief Computes the shortest path distance matrix 
  * for a weighted, directed graph using the Floyd-Warshall algorithm.
  *
@@ -137,9 +119,12 @@ std::vector<std::vector<float>> distance_matrix(GraphT& graph) {
 
   for (uint64_t k = 0; k < n; ++k) {
     for (uint64_t i = 0; i < n; ++i) {
-      for (uint64_t j = 0; j < n; ++j) {
-        if (dist[i][k] != INF && dist[k][j] != INF) {
-          dist[i][j] = std::min(dist[i][j], dist[i][k] + dist[k][j]);
+      if (std::isfinite(dist[i][k])) {
+        for (uint64_t j = 0; j < n; ++j) {
+          if (std::isfinite(dist[k][j])) {
+            float new_dist = dist[i][k] + dist[k][j];
+            dist[i][j]     = std::min(dist[i][j], new_dist);
+          }
         }
       }
     }
@@ -168,7 +153,6 @@ std::vector<std::vector<float>> distance_matrix_bfs(GraphT& graph) {
 
   std::vector<std::vector<float>> dist(n, std::vector<float>(n, INF));
 
-  //This fomrulation is faster than regular BFS with std::queue
   for (uint64_t s = 0; s < n; ++s) {
     std::vector<uint64_t> toVisit;
     std::vector<uint64_t> nextToVisit;
@@ -180,16 +164,17 @@ std::vector<std::vector<float>> distance_matrix_bfs(GraphT& graph) {
 
     while (!toVisit.empty()) {
       depth++;
+
       for (uint64_t u : toVisit) {
-        for (uint64_t v : graph.getNeighbors(u)) {
+        for (uint64_t v : graph.getEdges(u)) {
           if (dist[s][v] == INF) {
             dist[s][v] = depth;
             nextToVisit.push_back(v);
           }
         }
-        std::swap(nextToVisit, toVisit);
-        nextToVisit.clear();
       }
+      toVisit.clear();
+      std::swap(nextToVisit, toVisit);
     }
   }
 
@@ -197,16 +182,110 @@ std::vector<std::vector<float>> distance_matrix_bfs(GraphT& graph) {
 }
 
 /**
- * Returns the closeness centrality for each vertex
- * Calls the closeness_centrality function
+ * @brief Returns the closeness centrality, which is the inverse of the sum of distances 
+ * between a vertex and all other vertices in the network.
+ * * Closeness C(v) = (N - 1) / Sum(d(v, u)) for all u != v.
+ * Adheres to the standard definition: Closeness is 0 if the graph is not fully connected.
+ * * @param GraphT The graph type.
+ * @param[in] graph The input graph.
+ * @param[in] source The vertex for which to calculate centrality.
+ * @returns The closeness centrality score. Returns 0.0f if the source cannot reach all other nodes.
+ */
+template <typename GraphT>
+float closeness_centrality(const GraphT& graph, uint64_t source) {
+  std::vector<algorithms::WalkResult> distances = graphs::algorithms::walk_bfs(graph, source);
+
+  double sum_of_distances = 0.0;
+
+  uint64_t n = graph.getVertexCount();
+
+  if (n <= 1) {
+    return 0.0f;
+  }
+
+  if (distances.size() != n) {
+    return 0.0f;
+  }
+
+  const float INF = std::numeric_limits<float>::infinity();
+
+  for (const auto& result : distances) {
+    float dist = (float)result.distanceFromSource;
+
+    sum_of_distances += dist;
+  }
+
+  return (float)(((double)n - 1) / sum_of_distances);
+}
+
+
+/**
+ * @brief Returns the closeness centrality for each vertex
+ * Calls the corrected closeness_centrality function
  * @returns The closeness centrality vector
  */
 template <typename GraphT>
 std::vector<float> closeness(const GraphT& graph) {
+  uint64_t           n = graph.getVertexCount();
   std::vector<float> results;
+  results.reserve(n);
 
-  for (size_t i = 0; i < graph.getVertexCount(); i++)
+  for (uint64_t i = 0; i < n; i++)
     results.push_back(closeness_centrality(graph, i));
+
+  return results;
+}
+
+
+/**
+ * @brief Computes the closeness centrality for all vertices using a pre-computed 
+ * All-Pairs Shortest Path (APSP) distance matrix, using the common formula for 
+ * disconnected graphs: normalized by the number of reachable nodes.
+ *
+ * @param[in] dist_matrix A 2D vector where dist_matrix[i][j] is the shortest path 
+ * distance from vertex i to vertex j.
+ * @returns A vector of floats representing the closeness centrality score for each vertex.
+ */
+std::vector<float> closeness_matrix(const std::vector<std::vector<float>>& dist_matrix) {
+  if (dist_matrix.empty()) {
+    return {};
+  }
+
+  uint64_t           n = dist_matrix.size();
+  std::vector<float> results;
+  results.reserve(n);
+
+  const float INF = std::numeric_limits<float>::infinity();
+
+  for (uint64_t i = 0; i < n; i++) {
+    double   sum_of_distances      = 0.0;
+    uint64_t reachable_nodes_count = 0;
+
+    for (uint64_t j = 0; j < n; j++) {
+      if (i == j) {
+        continue;
+      }
+
+      float dist = dist_matrix[i][j];
+
+      if (dist < INF && dist >= 0) {
+        sum_of_distances += dist;
+        reachable_nodes_count++;
+      }
+    }
+
+    if (reachable_nodes_count == (n - 1) && sum_of_distances > 0.0) {
+      results.push_back((float)(((double)n - 1) / sum_of_distances));
+    } else if (reachable_nodes_count < (n - 1) && sum_of_distances > 0.0) {
+      double c_v = ((double)reachable_nodes_count) / sum_of_distances;
+
+      double c_prime_v = c_v * ((double)reachable_nodes_count / (double)(n - 1));
+
+      results.push_back(0.0f);
+    } else {
+      results.push_back(0.0f);
+    }
+  }
 
   return results;
 }
