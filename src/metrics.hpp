@@ -119,7 +119,8 @@ template <typename GraphT>
 std::vector<std::vector<float>> distance_matrix(GraphT& graph) {
   uint64_t n = graph.getVertexCount();
 
-  const float                     INF = std::numeric_limits<float>::infinity();
+  const float INF = std::numeric_limits<float>::infinity();
+
   std::vector<std::vector<float>> dist(n, std::vector<float>(n, INF));
 
   for (uint64_t i = 0; i < n; ++i) {
@@ -140,6 +141,54 @@ std::vector<std::vector<float>> distance_matrix(GraphT& graph) {
         if (dist[i][k] != INF && dist[k][j] != INF) {
           dist[i][j] = std::min(dist[i][j], dist[i][k] + dist[k][j]);
         }
+      }
+    }
+  }
+
+  return dist;
+}
+
+/**
+ * @brief Computes the unweighted shortest path distance matrix
+ * for a graph using BFS from each node. The distance is the minimum number of edges.
+ *
+ * @param GraphT The graph type.
+ * @param[in] graph The input graph (passed by reference) for which the distance matrix is computed.
+ * It is assumed GraphT has methods: getVertexCount(), getNeighbors(u), and an
+ * implicit understanding that getNeighbors(u) returns the indices of nodes v
+ * such that (u, v) is an edge.
+ * @return A 2D vector of floats representing the distance matrix, where `dist[i][j]` is the
+ * unweighted shortest path distance (number of edges). Unconnected nodes have distance INF.
+ */
+template <typename GraphT>
+std::vector<std::vector<float>> distance_matrix_bfs(GraphT& graph) {
+  uint64_t n = graph.getVertexCount();
+
+  const float INF = std::numeric_limits<float>::infinity();
+
+  std::vector<std::vector<float>> dist(n, std::vector<float>(n, INF));
+
+  //This fomrulation is faster than regular BFS with std::queue
+  for (uint64_t s = 0; s < n; ++s) {
+    std::vector<uint64_t> toVisit;
+    std::vector<uint64_t> nextToVisit;
+
+    uint32_t depth = 0;
+
+    dist[s][s] = depth;
+    toVisit.push_back(s);
+
+    while (!toVisit.empty()) {
+      depth++;
+      for (uint64_t u : toVisit) {
+        for (uint64_t v : graph.getNeighbors(u)) {
+          if (dist[s][v] == INF) {
+            dist[s][v] = depth;
+            nextToVisit.push_back(v);
+          }
+        }
+        std::swap(nextToVisit, toVisit);
+        nextToVisit.clear();
       }
     }
   }
