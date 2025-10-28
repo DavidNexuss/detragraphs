@@ -209,6 +209,8 @@ GraphT preferential_directed(uint64_t n, uint64_t e, RandomSource randomSource =
 template <typename GraphT, typename RandomSource = random_sources::Standard>
 GraphT recursive_tree(uint64_t levels, uint64_t maxlevelcount, float p, RandomSource randomSource = RandomSource{}) {
   GraphT g;
+  g.setType(GraphType::UNDIRECTED);
+
   if (levels == 0) return g;
 
   g.addVertices(1);

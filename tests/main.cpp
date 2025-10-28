@@ -49,11 +49,11 @@ void benchmark() {
 }
 
 void test_prefferential() {
-  std::cout << metrics::degree_sequence(generators::preferential_directed<backends::AdjacencyListVector, random_sources::XORand>(400, 9000)) << std::endl;
+  std::cout << metrics::degree_sequence(generators::preferential_directed<Graph<backends::AdjacencyListVector>, random_sources::XORand>(400, 9000)) << std::endl;
 }
 
 void test_tree() {
-  std::cout << metrics::degree_sequence(generators::recursive_tree<backends::AdjacencyListVector, random_sources::XORand>(7, 3, 0.9)) << std::endl;
+  std::cout << metrics::degree_sequence(generators::recursive_tree<Graph<backends::AdjacencyListVector>, random_sources::XORand>(7, 3, 0.9)) << std::endl;
 }
 
 void test_json_write() {
