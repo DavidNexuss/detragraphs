@@ -223,6 +223,7 @@ struct AdjacencyMatrixHash {
   size_t N = 0;
 
   uint64_t getVertexCount() const { return N; }
+  
   uint64_t getEdgeCount() const { return edges.size(); }
 
   uint64_t getEdgeCount(uint64_t vertex) const {

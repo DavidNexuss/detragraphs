@@ -108,7 +108,8 @@ struct Heat2D {
 
   using Vector = std::vector<float>;
 
-  Heat2D(int _N, int _M) : N(_N * _M), M(_N * _M), m(_M), n(_N) {}
+  Heat2D(int _N, int _M) :
+    N(_N * _M), M(_N * _M), m(_M), n(_N) {}
 
   void apply_inplace(const std::vector<float>& input, std::vector<float>& output) const {
     float alpha = 0.1f;
@@ -135,7 +136,8 @@ struct Heat2D_RB {
 
   using Vector = std::vector<float>;
 
-  Heat2D_RB(int _n, int _m, float _alpha = 0.1f) : N(_n * _n), M(_m * _m), n(_n), m(_m), alpha(_alpha) {}
+  Heat2D_RB(int _n, int _m, float _alpha = 0.1f) :
+    N(_n * _n), M(_m * _m), n(_n), m(_m), alpha(_alpha) {}
 
   void apply_inplace(Vector& u) const {
     //Red update
@@ -158,6 +160,16 @@ struct Heat2D_RB {
   }
 };
 
+void heat_jacobi_influx() {
+  int    N = 512;
+  Heat2D heatfunction(N, N);
+
+  std::vector<float> x(N * N);
+  x[N * N / 2 + N / 2] = 100.0f;
+
+  save_png_heatmap(math::jacobi(heatfunction, 1e-8, 6000, x, x), N, N, "heat_influx.png");
+}
+
 void heat_jacobi() {
   int    N = 512;
   Heat2D heatfunction(N, N);
@@ -179,6 +191,7 @@ void heat_gauss() {
 }
 
 int main() {
+  heat_jacobi_influx();
   heat_jacobi();
   heat_gauss();
 }

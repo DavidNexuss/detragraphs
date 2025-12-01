@@ -12,7 +12,7 @@ namespace math {
 * @returns The stationary vector
 * */
 template <typename Matrix>
-inline typename Matrix::Vector jacobi(const Matrix& matrix, float epsilon = 1e-7f, int maxiterations = 1000, typename Matrix::Vector current = {}) {
+inline typename Matrix::Vector jacobi(const Matrix& matrix, float epsilon = 1e-7f, int maxiterations = 1000, typename Matrix::Vector current = {}, typename Matrix::Vector constant = {}) {
   using Vector = typename Matrix::Vector;
 
   if (matrix.N == 0) return {};
@@ -29,6 +29,11 @@ inline typename Matrix::Vector jacobi(const Matrix& matrix, float epsilon = 1e-7
 
   do {
     matrix.apply_inplace(current, next);
+
+    if (constant.size() != 0) {
+      for (size_t i = 0; i < constant.size(); i++) next[i] += constant[i];
+    }
+
     difference = graphs::stats::square_difference(current, next);
     std::swap(current, next);
     iteration++;
@@ -40,8 +45,6 @@ inline typename Matrix::Vector jacobi(const Matrix& matrix, float epsilon = 1e-7
   return current;
 }
 
-/* 
-* */
 template <typename Matrix>
 inline typename Matrix::Vector gauss(const Matrix& matrix, float epsilon = 1e-7f, int maxiterations = 1000, typename Matrix::Vector current = {}) {
   using Vector = typename Matrix::Vector;

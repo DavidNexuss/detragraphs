@@ -32,7 +32,6 @@ void print_matrix(const std::vector<std::vector<float>>& matrix) {
       if (std::isinf(val)) {
         std::cout << std::setw(6) << "INF";
       } else {
-        // Print integers neatly
         std::cout << std::setw(6) << (int)val;
       }
     }
