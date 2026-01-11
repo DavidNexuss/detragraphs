@@ -9,6 +9,7 @@
 #include <util/vector_utils.hpp>
 #include <graphbackend/adjacencylist.hpp>
 #include <graphbackend/adjacencymatrix.hpp>
+#include <position/spring.hpp>
 
 using namespace graphs;
 using namespace detra;

@@ -22,9 +22,10 @@ struct AdjacencyListVector {
   std::vector<uint64_t> getEdges(uint64_t u) const { return adj[u]; }
 
   void addEdge(uint64_t from, uint64_t to) {
-    if (from == to) return;
-    if (std::find(adj[from].begin(), adj[from].end(), to) == adj[from].end())
-      adj[from].push_back(to);
+    if (adj.size() <= from)
+      adj.resize(from + 1);
+
+    adj[from].push_back(to);
   }
 
   bool isConnected(uint64_t from, uint64_t to) const {

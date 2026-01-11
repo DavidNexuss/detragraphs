@@ -32,7 +32,6 @@ struct Graph {
    */
   inline uint64_t getEdgeCount(uint64_t vertex) const { return data.getEdgeCount(vertex); }
 
-
   /**
    * Sets the type of the graph, UNDIRECTED or DIRECTED-
    */

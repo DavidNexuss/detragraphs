@@ -2,6 +2,7 @@
 #include <vector>
 #include <cstdint>
 #include <numeric>
+#include <cmath>
 #include "algorithms.hpp"
 
 namespace graphs {
@@ -21,6 +22,19 @@ std::vector<uint32_t> degree_sequence(const GraphT& graph) {
     degrees[i] = graph.getEdgeCount(i);
   }
 
+  return degrees;
+}
+
+template <typename GraphT>
+std::vector<uint32_t> degree_sequence_sorted(const GraphT& graph) {
+  auto degrees = metrics::degree_sequence(graph);
+  std::sort(degrees.begin(), degrees.end(), std::greater<>());
+}
+
+template <typename GraphT>
+std::vector<uint32_t> degree_sequence_sorted_log(const GraphT& graph) {
+  auto degrees = metrics::degree_sequence_sorted(graph);
+  for (uint32_t i = 0; i < degrees.size(); i++) degrees[i] = std::log(degrees[i]);
   return degrees;
 }
 

@@ -25,7 +25,7 @@ namespace generators {
  * @param n N vertices
  * @param p probabiliy that two vertices are connected
  **/
-template <typename GraphT, typename RandomSource = random_sources::Standard, bool directed = false>
+template <typename GraphT, typename RandomSource = random_sources::XORand, bool directed = false>
 GraphT erdos_renyi(uint64_t n, double p, RandomSource randomSource = RandomSource{}) {
   GraphT g;
 
@@ -199,6 +199,44 @@ GraphT preferential_directed(uint64_t n, uint64_t e, RandomSource randomSource =
   return g;
 }
 
+
+template <typename GraphT>
+GraphT factor_graph_fast_seed(uint64_t N, uint64_t gamma, float seed) {
+  GraphT g;
+  g.setType(GraphType::UNDIRECTED);
+
+  auto hash = [N, seed](uint64_t x) {
+    return (x * 137 + uint64_t(871 * seed)) % N;
+  };
+
+  g.addVertices(N);
+
+  for (uint64_t u = 2; u < N + 2; ++u) {
+    uint64_t offset = std::pow(u, gamma);
+    for (uint64_t v = u; v < N + 2; v += offset) {
+      g.addEdge(u - 2, hash(v - 2));
+    }
+  }
+
+  return g;
+}
+
+template <typename GraphT>
+GraphT factor_graph_fast(uint64_t N, uint64_t gamma) {
+  GraphT g;
+  g.setType(GraphType::UNDIRECTED);
+
+  g.addVertices(N);
+
+  for (uint64_t u = 2; u < N + 2; ++u) {
+    uint64_t offset = std::pow(u, gamma);
+    for (uint64_t v = u; v < N + 2; v += offset)
+      g.addEdge(u - 2, v - 2);
+  }
+
+  return g;
+}
+
 /**
  * Generates a recursive tree
  * @param levels The number of levels of the tree
@@ -239,6 +277,9 @@ GraphT recursive_tree(uint64_t levels, uint64_t maxlevelcount, float p, RandomSo
 
   return g;
 }
+
+template <typename GraphT>
+GraphT generate() {}
 
 } // namespace generators
 } // namespace graphs

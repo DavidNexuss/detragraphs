@@ -52,7 +52,6 @@ struct IOAdapterUnis : public IOAdapter {
     while ((entry = readdir(dir)) != nullptr) {
       std::string name = entry->d_name;
 
-      // Skip "." and ".."
       if (name == "." || name == "..") continue;
 
       result.push_back(name);

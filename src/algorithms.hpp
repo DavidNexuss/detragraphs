@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <assert.h>
+#include <numeric>
 
 namespace graphs {
 namespace algorithms {
@@ -245,7 +246,33 @@ std::vector<WalkResult> dijkstra(const GraphT& graph, uint64_t source) {
 
   return result;
 }
+template <typename GraphT>
+inline std::vector<std::vector<float>> computeDistanceMatrix(const GraphT& graph) {
 
+  const float INF = std::numeric_limits<float>::infinity();
+
+  int n = graph.getVertexCount();
+
+  std::vector<std::vector<float>> dist(n, std::vector<float>(n, INF));
+
+  for (size_t s = 0; s < n; ++s) {
+    std::queue<size_t> q;
+    dist[s][s] = 0.0f;
+    q.push(s);
+    while (!q.empty()) {
+      size_t u = q.front();
+      q.pop();
+      for (size_t v = 0; v < n; ++v) {
+        if (dist[s][v] == INF && graph.isConnectedUndirected(u, v)) {
+          dist[s][v] = dist[s][u] + 1.0f;
+          q.push(v);
+        }
+      }
+    }
+  }
+
+  return dist;
+}
 /**
  * Generates randoms sample of N elements from a vector indexed from 0:M
  */

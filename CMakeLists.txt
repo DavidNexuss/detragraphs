@@ -1,88 +1,121 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
+project(detragraphs LANGUAGES CXX)
 
-project(detragraphs)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_COMPILE_WARNING_AS_ERROR OFF)
 
-set(CMAKE_CXX_FLAGS_DEBUG "-fsanitize=address -g")
+set(CMAKE_CXX_FLAGS_DEBUG   "-fsanitize=address -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ftree-vectorize -march=native")
 
-# --------------------------
-# OpenMP Configuration
-# --------------------------
-# Only attempt to find and use OpenMP if NOT on macOS (APPLE).
+set(USE_OPENMP FALSE)
 if(NOT APPLE)
-    find_package(OpenMP) # No longer REQUIRED
+    find_package(OpenMP QUIET)
     if(OpenMP_CXX_FOUND)
-        message(STATUS "OpenMP found: ${OpenMP_CXX_FLAGS}")
+        message(STATUS "OpenMP found — binding you tighter")
         set(USE_OPENMP TRUE)
     else()
-        message(STATUS "OpenMP not found. Building without OpenMP support.")
+        message(STATUS "OpenMP eludes us... we proceed alone")
     endif()
 else()
-    message(STATUS "Skipping OpenMP on macOS.")
+    message(STATUS "macOS refuses OpenMP — as always")
 endif()
 
-# --------------------------
-# Add library
-# --------------------------
+
 file(GLOB_RECURSE DETRAGRAPHS_SOURCES src/*.cpp)
 add_library(detragraphs ${DETRAGRAPHS_SOURCES})
-target_include_directories(detragraphs PUBLIC src)
-target_include_directories(detragraphs PUBLIC lib/json/include)
+
+find_package(Eigen3 3.4 QUIET NO_MODULE)
+
+if(Eigen3_FOUND)
+    message(STATUS "Eigen3 claimed from system — but we shall make it kneel beautifully")
+
+    get_target_property(EIGEN3_INCLUDE_DIR Eigen3::Eigen INTERFACE_INCLUDE_DIRECTORIES)
+
+    if(EIGEN3_INCLUDE_DIR)
+        get_filename_component(EIGEN3_PARENT "${EIGEN3_INCLUDE_DIR}" DIRECTORY)
+
+        target_include_directories(detragraphs
+            BEFORE PUBLIC
+                "${EIGEN3_PARENT}"
+        )
+
+        target_link_libraries(detragraphs PUBLIC Eigen3::Eigen)
+    endif()
+else()
+    message(STATUS "System Eigen3 resists... we summon our own")
+
+    include(FetchContent)
+    FetchContent_Declare(
+        Eigen3
+        GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+        GIT_TAG 3.4.0
+        GIT_SHALLOW TRUE
+    )
+    set(EIGEN_BUILD_DOC OFF CACHE INTERNAL "")
+    set(EIGEN_BUILD_PKGCONFIG OFF CACHE INTERNAL "")
+    FetchContent_MakeAvailable(Eigen3)
+
+    target_link_libraries(detragraphs PUBLIC Eigen3::Eigen)
+endif()
+
+find_package(Spectra QUIET)
+
+if(NOT Spectra_FOUND)
+    message(STATUS "Spectra hides from us... we take it anyway")
+
+    include(FetchContent)
+    FetchContent_Declare(
+        Spectra
+        GIT_REPOSITORY https://github.com/yixuan/spectra.git
+        GIT_TAG master
+        GIT_SHALLOW TRUE
+    )
+    FetchContent_MakeAvailable(Spectra)
+endif()
+
+target_link_libraries(detragraphs PUBLIC Spectra::Spectra)
+
+target_include_directories(detragraphs
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<INSTALL_INTERFACE:include>
+    PRIVATE
+        lib/json/include
+)
+
+target_link_libraries(detragraphs
+    PUBLIC
+        Eigen3::Eigen
+        Spectra::Spectra   
+)
+
+target_link_libraries(detragraphs INTERFACE libscran::umappp)
 
 if(USE_OPENMP)
     target_link_libraries(detragraphs PUBLIC OpenMP::OpenMP_CXX)
     target_compile_options(detragraphs PRIVATE ${OpenMP_CXX_FLAGS})
 endif()
 
-# --------------------------
-# External dependencies
-# --------------------------
-include_directories(lib/detrarandom)
+include_directories(lib/detrarandom)    # legacy style — consider modernizing later
+include_directories(lib/octree)         # legacy style — consider modernizing later
+include_directories(lib/umap/include)   # legacy style — consider modernizing later
 add_subdirectory(lib/detrarandom)
+add_subdirectory(lib/umap)
 
-# --------------------------
-# Tests
-# --------------------------
-add_executable(detragraphs_test tests/main.cpp)
-target_include_directories(detragraphs_test PRIVATE src)
-target_link_libraries(detragraphs_test PRIVATE detragraphs) 
-if(USE_OPENMP)
-    target_link_libraries(detragraphs_test PRIVATE OpenMP::OpenMP_CXX)
-    target_compile_options(detragraphs_test PRIVATE ${OpenMP_CXX_FLAGS})
-endif()
+function(add_detragraphs_test name source_file)
+    add_executable(${name} ${source_file})
+    target_include_directories(${name} PRIVATE src)
+    target_link_libraries(${name} PRIVATE detragraphs)
+    if(USE_OPENMP)
+        target_link_libraries(${name} PRIVATE OpenMP::OpenMP_CXX)
+        target_compile_options(${name} PRIVATE ${OpenMP_CXX_FLAGS})
+    endif()
+endfunction()
 
-add_executable(detragraphs_test_csr tests/main_csr.cpp)
-target_include_directories(detragraphs_test_csr PRIVATE src)
-target_link_libraries(detragraphs_test_csr PRIVATE detragraphs)
-if(USE_OPENMP)
-    target_link_libraries(detragraphs_test_csr PRIVATE OpenMP::OpenMP_CXX)
-    target_compile_options(detragraphs_test_csr PRIVATE ${OpenMP_CXX_FLAGS})
-endif()
-
-add_executable(detragraphs_test_jacobi tests/main_jacobi.cpp)
-target_include_directories(detragraphs_test_jacobi PRIVATE src)
-target_link_libraries(detragraphs_test_jacobi PRIVATE detragraphs)
-if(USE_OPENMP)
-    target_link_libraries(detragraphs_test_jacobi PRIVATE OpenMP::OpenMP_CXX)
-    target_compile_options(detragraphs_test_jacobi PRIVATE ${OpenMP_CXX_FLAGS})
-endif()
-
-add_executable(detragraphs_test_closeness tests/main_closeness.cpp)
-target_include_directories(detragraphs_test_closeness PRIVATE src)
-target_link_libraries(detragraphs_test_closeness PRIVATE detragraphs)
-if(USE_OPENMP)
-    target_link_libraries(detragraphs_test_closeness PRIVATE OpenMP::OpenMP_CXX)
-    target_compile_options(detragraphs_test_closeness PRIVATE ${OpenMP_CXX_FLAGS})
-endif()
-
-add_executable(detragraphs_test_distance tests/main_distance.cpp)
-target_include_directories(detragraphs_test_distance PRIVATE src)
-target_link_libraries(detragraphs_test_distance PRIVATE detragraphs)
-if(USE_OPENMP)
-    target_link_libraries(detragraphs_test_distance PRIVATE OpenMP::OpenMP_CXX)
-    target_compile_options(detragraphs_test_distance PRIVATE ${OpenMP_CXX_FLAGS})
-endif()
+add_detragraphs_test(detragraphs_test            tests/main.cpp)
+add_detragraphs_test(detragraphs_test_csr        tests/main_csr.cpp)
+add_detragraphs_test(detragraphs_test_jacobi     tests/main_jacobi.cpp)
+add_detragraphs_test(detragraphs_test_closeness  tests/main_closeness.cpp)
+add_detragraphs_test(detragraphs_test_distance   tests/main_distance.cpp)

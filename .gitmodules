@@ -7,3 +7,9 @@
 [submodule "lib/glm"]
 	path = lib/glm
 	url = https://github.com/g-truc/glm.git
+[submodule "lib/octree"]
+	path = lib/octree
+	url = https://github.com/jbehley/octree
+[submodule "lib/umap"]
+	path = lib/umap
+	url = https://github.com/libscran/umappp
