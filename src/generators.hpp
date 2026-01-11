@@ -24,6 +24,7 @@ namespace generators {
  * @brief Generate an undiretced Erdos-Renyi graph using N vertices and connect them with probabiliy p
  * @param n N vertices
  * @param p probabiliy that two vertices are connected
+ * @param randomSource the random source used
  **/
 template <typename GraphT, typename RandomSource = random_sources::XORand, bool directed = false>
 GraphT erdos_renyi(uint64_t n, double p, RandomSource randomSource = RandomSource{}) {
@@ -33,62 +34,50 @@ GraphT erdos_renyi(uint64_t n, double p, RandomSource randomSource = RandomSourc
   g.addVertices(n);
 
   for (uint64_t i = 0; i < n; ++i) {
-    for (uint64_t j = i + 1; j < n; ++j) {
-      if (i != j && randomSource.randb()) {
-        g.addEdge(j, i);
+    uint64_t start_j = directed ? 0 : i + 1;
+    for (uint64_t j = start_j; j < n; ++j) {
+      if (i != j && randomSource.randf() < p) {
+        g.addEdge(i, j);
       }
     }
   }
   return g;
 }
 
-/**
- * Switch model generator
- * @param input The input graph
- * @param switches The number of switches
- * @param randomSource The random source (by default constructed specified in templated)
- * @returns The graph within the switch model generator
- **/
 template <typename GraphInput, typename GraphOutput, typename RandomSource = random_sources::Standard>
 GraphOutput switch_model(const GraphInput& input, int switches, RandomSource randomSource = RandomSource{}) {
   std::vector<std::pair<uint64_t, uint64_t>> edgelist = algorithms::to_edge_list(input);
 
   for (size_t i = 0; i < switches; i++) {
-    std::pair<uint64_t, uint64_t> edgeSource;
-    std::pair<uint64_t, uint64_t> edgeTarget;
-
+    uint64_t u, v, x, y; // u-v and x-y are the existing edges
     uint32_t edgeSourceIndex;
     uint32_t edgeTargetIndex;
 
     while (true) {
       edgeSourceIndex = randomSource.randi() % edgelist.size();
-      edgeTargetIndex = randomSource.randi() % edgelist.size();
+      do {
+        edgeTargetIndex = randomSource.randi() % edgelist.size();
+      } while (edgeSourceIndex == edgeTargetIndex);
 
-      edgeSource = edgelist[edgeSourceIndex];
-      edgeTarget = edgelist[edgeTargetIndex];
+      u = edgelist[edgeSourceIndex].first;
+      v = edgelist[edgeSourceIndex].second;
+      x = edgelist[edgeTargetIndex].first;
+      y = edgelist[edgeTargetIndex].second;
 
-      std::swap(edgeSource.second, edgeTarget.second);
+      if (u == x || u == y || v == x || v == y) continue;
 
-      // Same edge
-      if (edgeSource.first == edgeTarget.first && edgeSource.second && edgeTarget.second) continue;
-      // Same endpoint
-      if (edgeSource.first == edgeSource.second) continue;
-      // Same endpoint
-      if (edgeTarget.first == edgeTarget.second) continue;
+      if (u == y || x == v) continue;
 
       break;
     }
 
-    edgelist[edgeSourceIndex] = edgeSource;
-    edgelist[edgeTargetIndex] = edgeTarget;
+    edgelist[edgeSourceIndex] = {u, y}; // u-v becomes u-y
+    edgelist[edgeTargetIndex] = {x, v}; // x-y becomes x-v
   }
   return algorithms::from_edge_list<GraphOutput>(edgelist);
 }
 
 
-/**
- * Generate a Barabasi Albert graph with n vertices 
- **/
 template <typename GraphT, typename RandomSource = random_sources::Standard, bool directed = false>
 GraphT barabasi_albert(uint64_t n, uint64_t m0, uint64_t m, RandomSource randomSource = RandomSource{}) {
   if (m > m0 || m0 >= n) throw std::invalid_argument("Invalid parameters for BA model");
@@ -99,11 +88,11 @@ GraphT barabasi_albert(uint64_t n, uint64_t m0, uint64_t m, RandomSource randomS
 
   for (uint64_t i = 0; i < m0; ++i)
     for (uint64_t j = i + 1; j < m0; ++j)
-      if (i != j) g.addEdge(j, i);
+      g.addEdge(i, j);
 
   std::vector<uint64_t> degreeList;
   for (uint64_t i = 0; i < m0; ++i)
-    for (uint64_t d = 0; d < g.getVertexCount(); ++d)
+    for (uint64_t d = 0; d < m0 - 1; ++d)
       degreeList.push_back(i);
 
   g.addVertices(n - m0);
@@ -141,11 +130,14 @@ GraphT watts_strogatz(uint64_t n, uint64_t k, double beta, RandomSource randomSo
   for (uint64_t i = 0; i < n; ++i) {
     for (uint64_t j = 1; j <= k; ++j) {
       uint64_t neighbor = (i + j) % n;
+
       if (randomSource.randf() < beta) {
         uint64_t newNeighbor;
         do {
           newNeighbor = randomSource.randi() % n;
         } while (newNeighbor == i || g.isConnected(i, newNeighbor));
+
+        g.removeEdge(i, neighbor);
         g.addEdge(i, newNeighbor);
       }
     }
@@ -154,46 +146,42 @@ GraphT watts_strogatz(uint64_t n, uint64_t k, double beta, RandomSource randomSo
   return g;
 }
 
-/**
- * Returns a preferential directed generated graph using a given number of vertices and number of edges
- * @param n The nmber of vertices
- * @param e The number of edges
- * @param randomSource The randomSource used
- * @returns The graph
- **/
 template <typename GraphT, typename RandomSource = random_sources::Standard>
 GraphT preferential_directed(uint64_t n, uint64_t e, RandomSource randomSource = RandomSource{}) {
   GraphT g;
   g.addVertices(n);
+  g.setType(GraphType::DIRECTED); // Assuming directed is intended
 
   std::vector<uint64_t> preferentialNodes;
   preferentialNodes.reserve(2 * e);
-
 
   for (uint64_t i = 0; i < n; ++i) {
     preferentialNodes.push_back(i);
   }
 
-  std::vector<uint64_t> inDegrees(n, 1);
 
   for (uint64_t i = 0; i < e; ++i) {
-    uint64_t u = i % n;
-    uint64_t v = u;
+    uint64_t u = randomSource.randi() % n;
 
-    size_t max_attempts = 10;
-    while (u == v || g.isConnected(v, u)) {
+    uint64_t v;
+    size_t   max_attempts = 100;
+
+    while (true) {
       v = preferentialNodes[randomSource.randi() % preferentialNodes.size()];
-      if (--max_attempts == 0) {
-        v = n;
+
+      if (u != v && !g.isConnected(u, v)) {
         break;
+      }
+
+      if (--max_attempts == 0) {
+        goto next_edge;
       }
     }
 
-    if (v < n && u != v) {
-      g.addEdge(v, u);
-      preferentialNodes.push_back(v);
-      inDegrees[v]++;
-    }
+    g.addEdge(u, v);
+    preferentialNodes.push_back(v);
+
+  next_edge:; // Label for `goto` to skip edge addition
   }
 
   return g;
