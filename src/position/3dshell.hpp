@@ -14,6 +14,14 @@ struct Shell3DCreateInfo {
   float    jitter       = 0.0f;
 };
 
+/**
+ * This algorithm is pretty straightforwad and only for debugging purposes since it does not show any relevant property of the graph
+ * for the most part.
+ *
+ * @param graph The graph to be layout.
+ * @param info the different parameters for the algorithm.
+ * @param sourceRandom source of randomness.
+ */
 template <typename GraphT, typename RandomSource = random_sources::Standard>
 PositionTable shell3d_layout_bfs(const GraphT& graph, const Shell3DCreateInfo& info = {}, RandomSource sourceRandom = {}) {
 

@@ -13,6 +13,14 @@ struct SpectralCreateInfo {
   bool  center = true;
 };
 
+/*
+ * This is the spectral graph layout in 2D using the unnormalized Laplacian.
+ * This method embeds vertices by projecting them onto the lowest non-zero eigenmodes of the graph Laplacian.
+ * The resulting layout captures clusters, symmetries, and long-range relationships deterministically.
+ * @param graph The graph
+ * @param info The parameters of the algorithm
+ */
+
 template <typename Backend>
 PositionTable spectral_layout_2d(const graphs::Graph<Backend>& graph, const SpectralCreateInfo& info = {}) {
   using std::size_t;
@@ -84,6 +92,13 @@ PositionTable spectral_layout_2d(const graphs::Graph<Backend>& graph, const Spec
   return result;
 }
 
+
+
+/*
+ * This is the spectral graph layout in 3D.
+ * @param graph The graph
+ * @param info The parameters of the algorithm
+ */
 template <typename Backend>
 PositionTable spectral_layout_3d(const graphs::Graph<Backend>& graph, const SpectralCreateInfo& info = {}) {
   using std::size_t;

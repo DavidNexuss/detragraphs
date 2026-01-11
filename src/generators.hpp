@@ -137,7 +137,6 @@ GraphT watts_strogatz(uint64_t n, uint64_t k, double beta, RandomSource randomSo
           newNeighbor = randomSource.randi() % n;
         } while (newNeighbor == i || g.isConnected(i, newNeighbor));
 
-        g.removeEdge(i, neighbor);
         g.addEdge(i, newNeighbor);
       }
     }

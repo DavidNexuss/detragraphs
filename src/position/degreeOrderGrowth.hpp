@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <numeric>
 #include "../position.hpp"
+#include <detrarandom/random_sources.hpp>
 
 namespace graphs {
 namespace position {
@@ -26,6 +27,16 @@ struct DegreeGrowthCreateInfo {
   float min_radius = 1e-4f;
 };
 
+/**
+ * This was my pitiful first attempt to layout the graph using a particular heuristic attempt to grow the graph from the highest node degree to the lowest
+ * outwarldy, the core idea was that the highest node degrees would be central and the peers would agglomerate on the surroundings, however the actual result turned out
+ * quite badly despite the tweaking i have done, i have left it as showcaing.
+ *
+ * @param old Old position table
+ * @param graph The graph
+ * @param info The parameters for the generator
+ * @param source, the random source
+ */
 template <typename GraphT, typename RandomSource = random_sources::Standard>
 PositionTable degree_growth(PositionTable& old, const GraphT& graph, const DegreeGrowthCreateInfo& info = DegreeGrowthCreateInfo{}, RandomSource source = {}) {
   using glm::vec3;
@@ -41,13 +52,11 @@ PositionTable degree_growth(PositionTable& old, const GraphT& graph, const Degre
   std::iota(order.begin(), order.end(), 0);
 
   std::vector<uint32_t> degree(n);
+
   for (size_t i = 0; i < n; ++i)
     degree[i] = graph.getEdgeCount(i);
 
-  std::sort(order.begin(), order.end(),
-            [&](size_t a, size_t b) {
-              return degree[a] > degree[b];
-            });
+  std::sort(order.begin(), order.end(), [&](size_t a, size_t b) { return degree[a] > degree[b]; });
 
   uint32_t max_degree = degree[order[0]];
 
@@ -63,10 +72,12 @@ PositionTable degree_growth(PositionTable& old, const GraphT& graph, const Degre
 
   if (info.init == DegreeGrowthCreateInfo::Init::kCircle) {
     float step = glm::two_pi<float>() / float(n);
+
     for (size_t i = 0; i < n; ++i) {
+
       float a = step * i;
-      result.positions[i] =
-        vec3(std::cos(a), 0.0f, std::sin(a)) * info.init_circle_radius;
+
+      result.positions[i] = vec3(std::cos(a), 0.0f, std::sin(a)) * info.init_circle_radius;
     }
   }
 
@@ -89,32 +100,23 @@ PositionTable degree_growth(PositionTable& old, const GraphT& graph, const Degre
     if (count > 0)
       centroid /= float(count);
 
-    float r =
-      info.base_radius *
-      std::pow(
-        (float(degree[v]) + 1.0f) /
-          (float(max_degree) + 1.0f),
-        info.degree_exponent);
+    float r = info.base_radius * std::pow((float(degree[v]) + 1.0f) / (float(max_degree) + 1.0f), info.degree_exponent);
 
     r = std::max(r, info.min_radius);
 
-    // Random direction
     float theta = source.randf() * glm::two_pi<float>();
     float z     = 2.0f * source.randf() - 1.0f;
     float s     = std::sqrt(1.0f - z * z);
 
-    vec3 dir(
-      s * std::cos(theta),
-      z,
-      s * std::sin(theta));
+    vec3 dir(s * std::cos(theta), z, s * std::sin(theta));
 
-    // Angular jitter to prevent crossings
     dir += info.angular_jitter * vec3(source.randf() - 0.5f, source.randf() - 0.5f, source.randf() - 0.5f);
 
     dir = glm::normalize(dir);
 
     result.positions[v] = centroid + dir * r;
-    placed[v]           = 1;
+
+    placed[v] = 1;
   }
 
   return result;

@@ -8,9 +8,12 @@
 namespace graphs {
 namespace position {
 
-/**
- * Single-step 3D force-directed layout (optimized using getEdges)
- * Updates positions incrementally in the provided PositionTable.
+/*
+ * Another attemp at force directed graph rendering, using Coulomb-like force.
+ * @param positions The initial positions. This is only one step of the algorithm.
+ * @param graph The graph.
+ * @param source The source of randomness.
+ * @param speed The update speed.
  */
 template <typename GraphT, typename RandomSource = random_sources::Standard>
 void force_directed_3d_step(PositionTable& positions, const GraphT& graph, RandomSource source = {}, float speed = 0.1f) {

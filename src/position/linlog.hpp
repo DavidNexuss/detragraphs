@@ -15,6 +15,15 @@ struct LinLogCreateInfo {
   int   maxNeighbors = 10;
   float maxDistance  = 10.0f;
 };
+
+/**
+ * Octree accelerated linlog implementation
+ *
+ * @param positions The position table
+ * @param graph the graph
+ * @param info the parameters for the algorithm
+ * @param source the random source
+ */
 template <typename GraphT, typename RandomSource = random_sources::Standard>
 void linlog_step(PositionTable& positions, const GraphT& graph, const LinLogCreateInfo& info = {}, RandomSource source = {}) {
   using namespace unibn;

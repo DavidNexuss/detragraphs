@@ -3,10 +3,9 @@
 #include <glm/glm.hpp>
 #include <cmath>
 #include <limits>
-#include <queue>
 #include <detrarandom/random_sources.hpp>
-#include "../position.hpp"
 #include <algorithms.hpp>
+#include "../position.hpp"
 
 namespace graphs {
 namespace position {

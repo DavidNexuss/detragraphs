@@ -1,14 +1,12 @@
 #pragma once
-
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 #include <unordered_map>
 #include <algorithm>
-#include <random>
+#include <detrarandom/random_sources.hpp>
 #include "../position.hpp"
 #include "../metrics.hpp"
-#include <detrarandom/random_sources.hpp>
 
 namespace graphs {
 namespace position {
@@ -25,6 +23,18 @@ struct RadialPlacementCreateInfo {
   float peer_cloud_spread               = 1.8f; // how widely the devotees may orbit their lords
 };
 
+
+/**
+ * This is my 2nd attempt at power law degree graph plotting, it works the following way.
+ *
+ * We first obtain the ordering of nodes by degree, we make as selection based on the percintiles of nodes we are willing to select as hubs (this algorithm assumes there are nodes
+ *  with a very characteristic high degree (comparable to the actual graph size) it separates hubs and then does an attraction simulation on the peers.
+ *
+ *  @param old The initial positioing of the network.
+ *  @param graph The graph to be rendered.
+ *  @param info The parameters of the algorithm.
+ *  @param source The random source.
+ */
 template <typename GraphT, typename RandomSource = random_sources::Standard>
 PositionTable radialPlacement(PositionTable& old, const GraphT& graph, const RadialPlacementCreateInfo& info = RadialPlacementCreateInfo{}, RandomSource source = {}) {
 
@@ -37,9 +47,7 @@ PositionTable radialPlacement(PositionTable& old, const GraphT& graph, const Rad
 
   std::vector<size_t> order(n);
   std::iota(order.begin(), order.end(), 0);
-  std::sort(order.begin(), order.end(), [&](size_t a, size_t b) {
-    return degrees[a] > degrees[b];
-  });
+  std::sort(order.begin(), order.end(), [&](size_t a, size_t b) { return degrees[a] > degrees[b]; });
 
   size_t hub_threshold_idx = static_cast<size_t>(n * (100.f - info.hub_degree_threshold_percentile) / 100.f);
 
@@ -64,10 +72,7 @@ PositionTable radialPlacement(PositionTable& old, const GraphT& graph, const Rad
     float theta = source.randf(0.0f, glm::pi<float>());
     float phi   = std::acos(1.f - 2.f * source.randf(0.1f, 1.0f));
     float r     = std::cbrt(source.randf(0.1f, 1.0f)) * 5.f;
-    hub_pos[i]  = vec3(
-      r * std::sin(phi) * std::cos(theta),
-      r * std::sin(phi) * std::sin(theta),
-      r * std::cos(phi));
+    hub_pos[i]  = vec3(r * std::sin(phi) * std::cos(theta), r * std::sin(phi) * std::sin(theta), r * std::cos(phi));
   }
 
   const float hub_k = info.hub_spring_length;

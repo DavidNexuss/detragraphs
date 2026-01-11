@@ -35,12 +35,15 @@ struct KamadaKawaiCreateInfo {
   float min_distance       = 1e-6f;
 };
 
+/**
+ * The kamada kawai algorithm for plotting 2D only, deep explanation below.
+ * @param old The initial position table.
+ * @param graph the graph to be plot.
+ * @param info The configuration for the algorithm
+ * @param source The random source
+ */
 template <typename GraphT, typename RandomSource = random_sources::Standard>
-PositionTable kamada_kawai(
-  PositionTable&               old,
-  const GraphT&                graph,
-  const KamadaKawaiCreateInfo& info   = KamadaKawaiCreateInfo{},
-  RandomSource                 source = {}) {
+PositionTable kamada_kawai(PositionTable& old, const GraphT& graph, const KamadaKawaiCreateInfo& info = KamadaKawaiCreateInfo{}, RandomSource source = {}) {
   using glm::vec2;
   using glm::vec3;
   using std::size_t;
@@ -54,6 +57,7 @@ PositionTable kamada_kawai(
     return result;
   }
 
+  // Initialization from old, random, or circle.
   if (info.init == KamadaKawaiCreateInfo::Init::kFromOld &&
       old.positions.size() == n) {
 
@@ -64,10 +68,11 @@ PositionTable kamada_kawai(
     const float two_pi = glm::two_pi<float>();
 
     for (size_t i = 0; i < n; ++i) {
+
       const float r = info.init_random_radius * std::sqrt(source.randf());
       const float a = two_pi * source.randf();
-      result.positions[i] =
-        vec3(std::cos(a) * r, std::sin(a) * r, 0.0f);
+
+      result.positions[i] = vec3(std::cos(a) * r, std::sin(a) * r, 0.0f);
     }
 
   } else {
@@ -75,22 +80,22 @@ PositionTable kamada_kawai(
     const float two_pi = glm::two_pi<float>();
 
     for (size_t i = 0; i < n; ++i) {
-      const float angle =
-        (static_cast<float>(i) / static_cast<float>(n)) * two_pi;
-      result.positions[i] =
-        vec3(std::cos(angle), std::sin(angle), 0.0f) *
-        info.init_circle_radius;
+      float angle = (static_cast<float>(i) / static_cast<float>(n)) * two_pi;
+
+      result.positions[i] = vec3(std::cos(angle), std::sin(angle), 0.0f) * info.init_circle_radius;
     }
   }
 
   constexpr float INF = std::numeric_limits<float>::infinity();
 
-  std::vector<std::vector<float>> dist =
-    algorithms::computeDistanceMatrix(graph);
+  // We need distance matrix
+  std::vector<std::vector<float>> dist = algorithms::computeDistanceMatrix(graph);
 
   std::vector<std::vector<float>> L(n, std::vector<float>(n, 0.0f));
   std::vector<std::vector<float>> K(n, std::vector<float>(n, 0.0f));
 
+
+  // We need maximum distance
   float maxd = 0.0f;
   for (size_t i = 0; i < n; ++i)
     for (size_t j = 0; j < n; ++j)
@@ -108,9 +113,7 @@ PositionTable kamada_kawai(
       if (dist[i][j] < INF) {
         const float dij = std::max(dist[i][j], info.min_distance);
         L[i][j]         = info.L0 * (dij / maxd);
-        K[i][j]         = info.k_constant_base /
-          std::max(std::pow(dij, info.distance_power),
-                   info.min_distance);
+        K[i][j]         = info.k_constant_base / std::max(std::pow(dij, info.distance_power), info.min_distance);
       } else {
         L[i][j] = info.L0;
         K[i][j] = 0.0f;
@@ -132,23 +135,23 @@ PositionTable kamada_kawai(
       for (size_t i = 0; i < n; ++i) {
         if (i == m || K[m][i] == 0.0f) continue;
 
-        const vec2 pos_i = vec2(result.positions[i]);
-        const vec2 delta = pos_m - pos_i;
+        vec2 pos_i = vec2(result.positions[i]);
+        vec2 delta = pos_m - pos_i;
 
         float dij = glm::length(delta);
         dij       = std::max(dij, info.min_distance);
 
-        const float kij = K[m][i];
-        const float lij = L[m][i];
+        float kij = K[m][i];
+        float lij = L[m][i];
 
-        const float inv_d  = 1.0f / dij;
-        const float common = kij * (1.0f - lij * inv_d);
+        float inv_d  = 1.0f / dij;
+        float common = kij * (1.0f - lij * inv_d);
 
         gx += common * delta.x;
         gy += common * delta.y;
 
-        const float dij3   = dij * dij * dij;
-        const float inv_d3 = 1.0f / std::max(dij3, 1e-12f);
+        float dij3   = dij * dij * dij;
+        float inv_d3 = 1.0f / std::max(dij3, 1e-12f);
 
         gxx += kij * (1.0f - lij * delta.y * delta.y * inv_d3);
         gyy += kij * (1.0f - lij * delta.x * delta.x * inv_d3);
@@ -167,9 +170,10 @@ PositionTable kamada_kawai(
 
       } else {
 
-        constexpr float step = 0.1f;
-        dx                   = -step * gx;
-        dy                   = -step * gy;
+        float step = 0.1f;
+
+        dx = -step * gx;
+        dy = -step * gy;
       }
 
       result.positions[m].x += dx;
