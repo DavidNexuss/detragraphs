@@ -26,11 +26,9 @@ endif()
 file(GLOB_RECURSE DETRAGRAPHS_SOURCES src/*.cpp)
 add_library(detragraphs ${DETRAGRAPHS_SOURCES})
 
-find_package(Eigen3 3.4 QUIET NO_MODULE)
+find_package(Eigen3 QUIET NO_MODULE)
 
 if(Eigen3_FOUND)
-    message(STATUS "Eigen3 claimed from system — but we shall make it kneel beautifully")
-
     get_target_property(EIGEN3_INCLUDE_DIR Eigen3::Eigen INTERFACE_INCLUDE_DIRECTORIES)
 
     if(EIGEN3_INCLUDE_DIR)
@@ -44,8 +42,6 @@ if(Eigen3_FOUND)
         target_link_libraries(detragraphs PUBLIC Eigen3::Eigen)
     endif()
 else()
-    message(STATUS "System Eigen3 resists... we summon our own")
-
     include(FetchContent)
     FetchContent_Declare(
         Eigen3
@@ -63,8 +59,6 @@ endif()
 find_package(Spectra QUIET)
 
 if(NOT Spectra_FOUND)
-    message(STATUS "Spectra hides from us... we take it anyway")
-
     include(FetchContent)
     FetchContent_Declare(
         Spectra
