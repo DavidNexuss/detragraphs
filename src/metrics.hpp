@@ -29,6 +29,7 @@ template <typename GraphT>
 std::vector<uint32_t> degree_sequence_sorted(const GraphT& graph) {
   auto degrees = metrics::degree_sequence(graph);
   std::sort(degrees.begin(), degrees.end(), std::greater<>());
+  return degrees;
 }
 
 template <typename GraphT>
@@ -260,7 +261,7 @@ std::vector<float> closeness(const GraphT& graph) {
  * distance from vertex i to vertex j.
  * @returns A vector of floats representing the closeness centrality score for each vertex.
  */
-std::vector<float> closeness_matrix(const std::vector<std::vector<float>>& dist_matrix) {
+inline std::vector<float> closeness_matrix(const std::vector<std::vector<float>>& dist_matrix) {
   if (dist_matrix.empty()) {
     return {};
   }

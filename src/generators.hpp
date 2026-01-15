@@ -234,7 +234,6 @@ GraphT factor_graph_fast(uint64_t N, uint64_t gamma) {
 template <typename GraphT, typename RandomSource = random_sources::Standard>
 GraphT recursive_tree(uint64_t levels, uint64_t maxlevelcount, float p, RandomSource randomSource = RandomSource{}) {
   GraphT g;
-  g.setType(GraphType::UNDIRECTED);
 
   if (levels == 0) return g;
 
